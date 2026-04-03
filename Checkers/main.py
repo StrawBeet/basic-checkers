@@ -102,24 +102,30 @@ def check_captures(i, self, class2):
     sign = 1 + 2 * reverse
     if (i // 4) % 2 == 0 - 3 * reverse:
         if i % 4 == 0:
-            if class2.board[i + sign * 4] == 1 and class2.board[i + sign * 9] == 0:
-                legal_captures.append(i + sign * 4)
+            if class2.board[i + sign * 4] == 1 and class2.board[i + sign * 9] == 0 and self.board[i + sign * 9] == 0:
+                new = i + sign * 4
+                legal_captures += [[new, new + sign * 5]]
+                legal_captures[len(legal_captures) - 1] += check_captures(new, self, class2)
             else:
-                pass
+                return []
         else:
             tested = [i + sign * (3 + k / 2) for k in [0, 2] if
-                                 class2.board[i + sign * (3 + k / 2)] == 1 and class2.board[i + sign * (7 + k)] == 0]
+                                 class2.board[i + sign * (3 + k / 2)] == 1 and class2.board[i + sign * (7 + k)] == 0 and self.board[i + sign * (7 + k) == 0]]
             for k in tested:
-                legal_captures += k
+                legal_captures += [[k, 2 * k - i + sign]]
+                legal_captures[len(legal_captures) - 1] += check_captures(2 * k - i + sign, self, class2)
+
     else:
         if i % 4 == 3 + 3 * reverse:
-            if class2.board[i + sign * 4] == 1 and class2.board[i + sign * 9] == 0:
-                legal_captures.append(i + sign * 4)
+            if class2.board[i + sign * 4] == 1 and class2.board[i + sign * 7] == 0 and self.board[i + sign * 7] == 0:
+                new = i + sign * 4
+                legal_captures += new
+                legal_captures += check_captures(new, self, class2)
             else:
-                pass
+                return []
         else:
             tested = [i + sign * (4 + k / 2) for k in [0, 2] if
-                                 class2.board[i + sign * (4 + k / 2)] == 1 and class2.board[i + sign * (7 + k)] == 0]
+                                 class2.board[i + sign * (4 + k / 2)] == 1 and class2.board[i + sign * (9 + k)] == 0 and self.board[i + sign * (9 + k)] == 0]
             for k in tested:
                 legal_captures += k
 
@@ -148,10 +154,10 @@ class Checkers:
     def captures(self, class2):
         legal_captures = {}
 
-        for i in [k for k in self.board if self.board[k] != 0 and len(self.legal_moves(class2)) < 2]:
+        for i in [k for k in self.board if self.board[k] != 0 and len([j for j in self.legal_moves(class2) if self.legal_moves(class2)[j] != []]) < 2]:
             legal_captures[i] = check_captures(i, self, class2)
 
-        for i in [k for k in self.board if self.board[k] == 0 and len(self.legal_moves(class2)) > 2]:
+        for i in [k for k in range(32) if k not in legal_captures.copy().keys()]:
             legal_captures[i] = []
 
         return legal_captures
@@ -184,7 +190,7 @@ def draw_pieces(white, black):
 
 def draw_moves(white, black, square):
     moves = [i for i in white.captures(black) if white.captures(black)[i] != []]
-
+    print(moves)
     # The code below draws the possible moves if you clicked on a piece
     if white.board[square] == 1:
         if len(moves) == 0:
@@ -233,6 +239,7 @@ while running:
 
 
     if menu:
+        # The code below draws and provides functionality to the main menu of the game
         screen.blit(local_mult_surf, local_mult_rect)
         screen.blit(local_mult_text, local_mult_text_rect)
         screen.blit(bot_surf, bot_rect)
@@ -298,6 +305,7 @@ while running:
                                 draw_board()
                     else:
                         if pygame.mouse.get_pressed()[0]:
+                            print(previous_moves)
                             for k in previous_moves:
                                 if black_rects[28 - 4 * (k // 4) + k % 4].scale_by(0.7).collidepoint(mouse_pos):
                                     blackCheckers = move(blackCheckers, previous_chosen, k)
@@ -306,18 +314,18 @@ while running:
                                     turn_end = True
                                 else:
                                     pass
-                                if being_moved >= 0:
-                                    previous_moves = blackCheckers.legal_moves(whiteCheckers).copy()[being_moved]
-                                else:
-                                    pass
-                                previous_chosen = being_moved
-                                if turn_end:
-                                    print("Turn end")
-                                    previous_moves = []
-                                    previous_chosen = -1
-                                    turn = (turn + 1) % 2
-                                    turn_end = False
-                                    draw_board()
+                            if being_moved >= 0:
+                                previous_moves = blackCheckers.legal_moves(whiteCheckers).copy()[being_moved]
+                            else:
+                                pass
+                            previous_chosen = being_moved
+                            if turn_end:
+                                print("Turn end")
+                                previous_moves = []
+                                previous_chosen = -1
+                                turn = (turn + 1) % 2
+                                turn_end = False
+                                draw_board()
 
                 else:
                     turn = (turn + 1) % 2
