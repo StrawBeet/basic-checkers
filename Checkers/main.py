@@ -11,6 +11,7 @@ settings = False
 turn = 0
 turn_end = False
 
+previous_chosen = -1
 being_moved = -1
 previous_moves = []
 mouse_pos = pygame.mouse.get_pos()
@@ -141,6 +142,9 @@ class Checkers:
         for i in [k for k in self.board if self.board[k] == 0]:
             legal_moves[i] = []
 
+        print("Legal:", legal_moves)
+        print("Self:", whiteCheckers.board)
+        print("Satisfied:", [k for k in self.board if self.board[k] == 0])
         return legal_moves
 
     def captures(self, class2):
@@ -268,26 +272,26 @@ while running:
                     else:
                         if previous_moves == []:
                             pass
-                        else:
-                            for k in previous_moves:
-                                pygame.draw.rect(screen, brown, black_rects[28 - 4 * (k // 4) + k % 4])
-                            previous_moves = []
+
                 if not bot:
                     if pygame.mouse.get_pressed()[0]:
                         for k in previous_moves:
                             if black_rects[28 - 4 * (k // 4) + k % 4].scale_by(0.7).collidepoint(mouse_pos):
-                                whiteCheckers = move(whiteCheckers, being_moved, k)
+                                whiteCheckers = move(whiteCheckers, previous_chosen, k)
+                                print(whiteCheckers.board)
                                 turn_end = True
                             else:
                                 pass
                         if being_moved >= 0:
-                            print(whiteCheckers.legal_moves(blackCheckers))
                             previous_moves = whiteCheckers.legal_moves(blackCheckers)[being_moved]
-                            print(previous_moves)
+                            print(whiteCheckers.legal_moves(blackCheckers))
                         else:
                             pass
+                        previous_chosen = being_moved
                         if turn_end:
+                            print("Turn end")
                             previous_moves = []
+                            previous_chosen = -1
                             turn = (turn + 1) % 2
                             turn_end = False
                 else:
