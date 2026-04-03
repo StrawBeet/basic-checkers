@@ -55,7 +55,8 @@ for i in range(8):
         black_rects.append(pygame.Rect(740, 32 + 100 * i, 100, 100))
         white_rects.append(pygame.Rect(840, 32 + 100 * i, 100, 100))
 
-def check_moves(i, class2, first):
+def check_moves(i, class1, class2, first):
+    # Returns all the legal moves for whichever piece is at i without including captures
     legal_moves = []
 
     if first:
@@ -72,7 +73,7 @@ def check_moves(i, class2, first):
             else:
                 pass
         else:
-            legal_moves += [i + sign * (3 + k) for k in [0, 1] if class2.board[i + sign * (3 + k)] == 0]
+            legal_moves += [i + sign * (3 + k) for k in [0, 1] if class2.board[i + sign * (3 + k)] == 0 and class1.board[i + sign * (3 + k)] == 0]
     else:
         if i % 4 == 3 + 3 * reverse:
             if class2.board[i + sign * 4] == 0:
@@ -80,12 +81,12 @@ def check_moves(i, class2, first):
             else:
                 pass
         else:
-            legal_moves += [i + sign * (4 + k) for k in [0, 1] if class2.board[i + sign * (4 + k)] == 0]
+            legal_moves += [i + sign * (4 + k) for k in [0, 1] if class2.board[i + sign * (4 + k)] == 0 and class1.board[i + sign * (3 + k)] == 0]
 
     return legal_moves
 
-
 def check_captures(i, self, class2):
+    # Returns all legal captures for whichever piece is at i
     legal_captures = []
 
     if self.first:
@@ -120,6 +121,7 @@ def check_captures(i, self, class2):
     return legal_captures
 
 class Checkers:
+    # This class will be used to keep track of all the white and black pieces on the board
     def __init__(self, board, first):
         self.board = board
         self.first = first
@@ -130,14 +132,14 @@ class Checkers:
 
 
         for i in [k for k in self.board if self.board[k] != 0]:
-            legal_moves[i] = check_moves(i, class2, self.first)
+            legal_moves[i] = check_moves(i, self, class2, self.first)
 
         return legal_moves
 
     def captures(self, class2):
         legal_captures = {}
 
-        for i in [k for k in self.board if self.board[k] != 0 and len(self.legal_moves(class2[k])) < 2]:
+        for i in [k for k in self.board if self.board[k] != 0 and len(self.legal_moves(class2)) < 2]:
             legal_captures[i] = check_captures(i, self, class2)
 
         return legal_captures
@@ -159,12 +161,33 @@ for i in range(32):
 blackCheckers = Checkers(black_board, False)
 
 def draw_pieces(white, black):
+    # Draws all the checkers pieces that are on the board
     for i in [i for i in white if white[i] == 1]:
-        pygame.draw.circle(screen, (255, 255, 255), (190 + 200 * (i % 4) + 100 * ((i // 4) % 2),782 - 100 * (i // 4)), 40)
+        pygame.draw.circle(screen, 'White', (190 + 200 * (i % 4) + 100 * ((i // 4) % 2),782 - 100 * (i // 4)), 40)
+        pygame.draw.circle(screen, 'Black', (190 + 200 * (i % 4) + 100 * ((i // 4) % 2),782 - 100 * (i // 4)), 40, 1)
 
     for i in [i for i in black if black[i] == 1]:
         pygame.draw.circle(screen, 'Black', (190 + 200 * (i % 4) + 100 * ((i // 4) % 2), 782 - 100 * (i // 4)), 40)
+        pygame.draw.circle(screen, 'White', (190 + 200 * (i % 4) + 100 * ((i // 4) % 2), 782 - 100 * (i // 4)), 40, 1)
 
+def draw_moves(white, black, square):
+    moves = [i for i in white.captures(black) if white.captures(black)[i] != []]
+
+    # The code below draws the possible moves if you clicked on a piece
+    if white.board[square] == 1:
+        if len(moves) == 0:
+            moves = white.legal_moves(black)
+            for i in [k for k in moves[square] if moves[square] != []]:
+                pygame.draw.circle(screen, (0, 0, 255, 180), (190 + 200 * (i % 4) + 100 * ((i // 4) % 2), 782 - 100 * (i // 4)), 20)
+                pygame.draw.circle(screen, 'White', (190 + 200 * (i % 4) + 100 * ((i // 4) % 2), 782 - 100 * (i // 4)), 20,
+                                   1)
+        else:
+            for i in moves[square]:
+                pygame.draw.circle(screen, (0, 0, 255, 180), (190 + 200 * (i % 4) + 100 * ((i // 4) % 2),
+                                                              782 - 100 * (i // 4)), 20)
+                pygame.draw.circle(screen, 'White', (190 + 200 * (i % 4) + 100 * ((i // 4) % 2),
+                                                     782 - 100 * (i // 4)), 20,
+                                   1)
 
 while running:
     for event in pygame.event.get():
@@ -197,6 +220,12 @@ while running:
                 pygame.draw.rect(screen, brown, black_rects[i])
 
             draw_pieces(whiteCheckers.board, blackCheckers.board)
+            if pygame.mouse.get_pressed()[0]:
+                for i in range(32):
+                    # Checks whether the mouse collides with where a piece could be. There cannot be any pieces on the white squares
+                    if black_rects[i].scale_by(0.8).collidepoint(mouse_pos):
+                        draw_moves(whiteCheckers, blackCheckers, 28 - 4 * (i // 4) + i % 4)
+
             if not bot:
                 pass
             else:
