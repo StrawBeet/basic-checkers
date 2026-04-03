@@ -9,6 +9,7 @@ game_active = False
 bot = False
 settings = False
 
+previous_moves = None
 mouse_pos = pygame.mouse.get_pos()
 
 brown = (54, 35, 18)
@@ -68,7 +69,7 @@ def check_moves(i, class1, class2, first):
 
     if (i // 4) % 2 == 0 - 3 * reverse:
         if i % 4 == 0:
-            if class2.board[i + sign * 4] == 0:
+            if class2.board[i + sign * 4] == 0 and class1.board[i + sign * 4] == 0:
                 legal_moves += [i + sign * 4]
             else:
                 pass
@@ -76,7 +77,7 @@ def check_moves(i, class1, class2, first):
             legal_moves += [i + sign * (3 + k) for k in [0, 1] if class2.board[i + sign * (3 + k)] == 0 and class1.board[i + sign * (3 + k)] == 0]
     else:
         if i % 4 == 3 + 3 * reverse:
-            if class2.board[i + sign * 4] == 0:
+            if class2.board[i + sign * 4] == 0 and class1.board[i + sign * 4] == 0:
                 legal_moves += [i + sign * 4]
             else:
                 pass
@@ -189,6 +190,28 @@ def draw_moves(white, black, square):
                                                      782 - 100 * (i // 4)), 20,
                                    1)
 
+def draw_board():
+    for i in range(32):
+        pygame.draw.rect(screen, beige, white_rects[i])
+        pygame.draw.rect(screen, brown, black_rects[i])
+    draw_pieces(whiteCheckers.board, blackCheckers.board)
+
+def move(color, moved, move_to):
+    """Moved indicated the piece moved while move indicates where it moves to"""
+    color.board[moved] = 0
+    color.board[move_to] = 1
+    return color
+
+def capture(color1, color2, moved, captured, move_to):
+    """Moved indicates the piece moves, captures is a list indicating all the captured pieces, move_to indicates
+    where the piece moves, color1 represents the color whose turn it is and color2 represents the other player"""
+    color1.board[moved] = 0
+    for i in captured:
+        color2.board[i] = 0
+    color1.board[move_to] = 1
+    return color1, color2
+
+screen.fill(dark_green) # So that the screen isn't filled too many times every second
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -196,8 +219,14 @@ while running:
         if event.type == pygame.MOUSEMOTION:
             mouse_pos = pygame.mouse.get_pos()
 
-    screen.fill(dark_green)
+
     if menu:
+        screen.blit(local_mult_surf, local_mult_rect)
+        screen.blit(local_mult_text, local_mult_text_rect)
+        screen.blit(bot_surf, bot_rect)
+        screen.blit(bot_text, bot_text_rect)
+        screen.blit(title_text, title_rect)
+
         if pygame.mouse.get_pressed()[0]:
             if local_mult_rect.collidepoint(mouse_pos):
                 menu = False
@@ -207,25 +236,32 @@ while running:
                 menu = False
                 game_active = True
                 bot = True
+            screen.fill(dark_green)
+            draw_board()
 
-        screen.blit(local_mult_surf, local_mult_rect)
-        screen.blit(local_mult_text, local_mult_text_rect)
-        screen.blit(bot_surf, bot_rect)
-        screen.blit(bot_text, bot_text_rect)
-        screen.blit(title_text, title_rect)
     else:
         if game_active:
-            for i in range(32):
-                pygame.draw.rect(screen, beige, white_rects[i])
-                pygame.draw.rect(screen, brown, black_rects[i])
-
-            draw_pieces(whiteCheckers.board, blackCheckers.board)
             if pygame.mouse.get_pressed()[0]:
                 for i in range(32):
                     # Checks whether the mouse collides with where a piece could be. There cannot be any pieces on the white squares
                     if black_rects[i].scale_by(0.8).collidepoint(mouse_pos):
+                        if previous_moves is None: # To avoid an error due to this variable's default value being None
+                            pass
+                        else:
+                            for k in previous_moves:
+                                #The equation below comes from the fact that the pieces are numbered from left
+                                #to right starting from the bottom of the board while the black_rects list is
+                                #numbered starting from the top left"""
+                                pygame.draw.rect(screen, brown, black_rects[28 - 4 * (k // 4) + k % 4])
                         draw_moves(whiteCheckers, blackCheckers, 28 - 4 * (i // 4) + i % 4)
-
+                        previous_moves = whiteCheckers.legal_moves(blackCheckers)[28 - 4 * (i // 4) + i % 4]
+                    else:
+                        if previous_moves is None:
+                            pass
+                        else:
+                            for k in previous_moves:
+                                pygame.draw.rect(screen, brown, black_rects[28 - 4 * (k // 4) + k % 4])
+                            previous_moves = None
             if not bot:
                 pass
             else:
