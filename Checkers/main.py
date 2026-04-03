@@ -8,8 +8,11 @@ menu = True
 game_active = False
 bot = False
 settings = False
+turn = 0
+turn_end = False
 
-previous_moves = None
+being_moved = -1
+previous_moves = []
 mouse_pos = pygame.mouse.get_pos()
 
 brown = (54, 35, 18)
@@ -135,6 +138,9 @@ class Checkers:
         for i in [k for k in self.board if self.board[k] != 0]:
             legal_moves[i] = check_moves(i, self, class2, self.first)
 
+        for i in [k for k in self.board if self.board[k] == 0]:
+            legal_moves[i] = []
+
         return legal_moves
 
     def captures(self, class2):
@@ -142,6 +148,9 @@ class Checkers:
 
         for i in [k for k in self.board if self.board[k] != 0 and len(self.legal_moves(class2)) < 2]:
             legal_captures[i] = check_captures(i, self, class2)
+
+        for i in [k for k in self.board if self.board[k] == 0 and len(self.legal_moves(class2)) > 2]:
+            legal_captures[i] = []
 
         return legal_captures
 
@@ -211,6 +220,7 @@ def capture(color1, color2, moved, captured, move_to):
     color1.board[move_to] = 1
     return color1, color2
 
+
 screen.fill(dark_green) # So that the screen isn't filled too many times every second
 while running:
     for event in pygame.event.get():
@@ -236,6 +246,7 @@ while running:
                 menu = False
                 game_active = True
                 bot = True
+
             screen.fill(dark_green)
             draw_board()
 
@@ -245,27 +256,42 @@ while running:
                 for i in range(32):
                     # Checks whether the mouse collides with where a piece could be. There cannot be any pieces on the white squares
                     if black_rects[i].scale_by(0.8).collidepoint(mouse_pos):
-                        if previous_moves is None: # To avoid an error due to this variable's default value being None
-                            pass
-                        else:
-                            for k in previous_moves:
-                                #The equation below comes from the fact that the pieces are numbered from left
-                                #to right starting from the bottom of the board while the black_rects list is
-                                #numbered starting from the top left"""
-                                pygame.draw.rect(screen, brown, black_rects[28 - 4 * (k // 4) + k % 4])
+                        being_moved = 28 - 4 * (i // 4) + i % 4
+                        print(being_moved)
+                        for k in previous_moves:
+                            #The equation below comes from the fact that the pieces are numbered from left
+                            #to right starting from the bottom of the board while the black_rects list is
+                            #numbered starting from the top left"""
+                            pygame.draw.rect(screen, brown, black_rects[28 - 4 * (k // 4) + k % 4])
                         draw_moves(whiteCheckers, blackCheckers, 28 - 4 * (i // 4) + i % 4)
-                        previous_moves = whiteCheckers.legal_moves(blackCheckers)[28 - 4 * (i // 4) + i % 4]
+
                     else:
-                        if previous_moves is None:
+                        if previous_moves == []:
                             pass
                         else:
                             for k in previous_moves:
                                 pygame.draw.rect(screen, brown, black_rects[28 - 4 * (k // 4) + k % 4])
-                            previous_moves = None
-            if not bot:
-                pass
-            else:
-                pass
+                            previous_moves = []
+                if not bot:
+                    if pygame.mouse.get_pressed()[0]:
+                        for k in previous_moves:
+                            if black_rects[28 - 4 * (k // 4) + k % 4].scale_by(0.7).collidepoint(mouse_pos):
+                                whiteCheckers = move(whiteCheckers, being_moved, k)
+                                turn_end = True
+                            else:
+                                pass
+                        if being_moved >= 0:
+                            print(whiteCheckers.legal_moves(blackCheckers))
+                            previous_moves = whiteCheckers.legal_moves(blackCheckers)[being_moved]
+                            print(previous_moves)
+                        else:
+                            pass
+                        if turn_end:
+                            previous_moves = []
+                            turn = (turn + 1) % 2
+                            turn_end = False
+                else:
+                    turn = (turn + 1) % 2
         else:
             print("Unexpected game state")
             running = False
