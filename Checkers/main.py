@@ -145,6 +145,7 @@ class Checkers:
         print("Legal:", legal_moves)
         print("Self:", whiteCheckers.board)
         print("Satisfied:", [k for k in self.board if self.board[k] == 0])
+        print("Other:", [k for k in self.board if self.board[k] != 0])
         return legal_moves
 
     def captures(self, class2):
