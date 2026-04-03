@@ -24,6 +24,86 @@ bot_surf.fill('black')
 title_text = title_font.render("Checkers", True, 'black')
 title_rect = title_text.get_rect(center = (screen.get_rect().centerx, 100))
 
+def check_moves(i, class2):
+    legal_moves = {}
+
+    if (i // 4) % 2 == 0:
+        if i % 4 == 0:
+            if class2.board[i + 4] == 0:
+                legal_moves[i] = [i + 4]
+            else:
+                legal_moves[i] = []
+        else:
+            legal_moves[i] = [i + 3 + k for k in [0, 1] if class2.board[i + 3 + k] == 0]
+    else:
+        if i % 4 == 3:
+            if class2.board[i + 4] == 0:
+                legal_moves[i] = [i + 4]
+            else:
+                legal_moves[i] = []
+        else:
+            legal_moves[i] = [i + 4 + k for k in [0, 1] if class2.board[i + 4 + k] == 0]
+
+    return legal_moves
+
+def check_moves_reverse(i, class2):
+    legal_moves = {}
+
+    if (i // 4) % 2 == 1:
+        if i % 4 == 3:
+            if class2.board[i - 4] == 0:
+                legal_moves[i] = [i - 4]
+            else:
+                legal_moves[i] = []
+        else:
+            legal_moves[i] = [i - 3 - k for k in [0, 1] if class2.board[i - 3 - k] == 0]
+    else:
+        if i % 4 == 0:
+            if class2.board[i - 4] == 0:
+                legal_moves[i] = [i - 4]
+            else:
+                legal_moves[i] = []
+        else:
+            legal_moves[i] = [i - 4 - k for k in [0, 1] if class2.board[i - 4 - k] == 0]
+
+    return legal_moves
+
+class Checkers:
+    def __init__(self, board, first):
+        self.board = board
+        self.first = first
+
+    def legal_moves(self, class2):
+        legal_moves = {}
+
+        if self.first:
+            for i in [k for k in self.board if self.board[k] != 0]:
+                check_moves(i, class2)
+        else:
+            for i in [k for k in self.board if self.board[k] != 0]:
+                check_moves_reverse(i, class2)
+
+        return legal_moves
+
+
+
+
+white_board = {}
+for i in range(32):
+    if i < 12:
+        white_board[i] = 1
+    else:
+        white_board[i] = 0
+whiteCheckers = Checkers(white_board, True)
+
+black_board = {}
+for i in range(32):
+    if i < 12:
+        black_board[31 - i] = 1
+    else:
+        black_board[31 - i] = 0
+blackCheckers = Checkers(black_board, False)
+
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
