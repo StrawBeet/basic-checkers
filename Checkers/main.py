@@ -24,67 +24,92 @@ bot_surf.fill('black')
 title_text = title_font.render("Checkers", True, 'black')
 title_rect = title_text.get_rect(center = (screen.get_rect().centerx, 100))
 
-def check_moves(i, class2):
-    legal_moves = {}
+def check_moves(i, class2, first):
+    legal_moves = []
 
-    if (i // 4) % 2 == 0:
-        if i % 4 == 0:
-            if class2.board[i + 4] == 0:
-                legal_moves[i] = [i + 4]
-            else:
-                legal_moves[i] = []
-        else:
-            legal_moves[i] = [i + 3 + k for k in [0, 1] if class2.board[i + 3 + k] == 0]
+    if first:
+        reverse = 0
     else:
-        if i % 4 == 3:
-            if class2.board[i + 4] == 0:
-                legal_moves[i] = [i + 4]
+        reverse = -1
+
+    sign = 1 + 2 * reverse
+
+    if (i // 4) % 2 == 0 - 3 * reverse:
+        if i % 4 == 0:
+            if class2.board[i + sign * 4] == 0:
+                legal_moves += [i + sign * 4]
             else:
-                legal_moves[i] = []
+                pass
         else:
-            legal_moves[i] = [i + 4 + k for k in [0, 1] if class2.board[i + 4 + k] == 0]
+            legal_moves += [i + sign * (3 + k) for k in [0, 1] if class2.board[i + sign * (3 + k)] == 0]
+    else:
+        if i % 4 == 3 + 3 * reverse:
+            if class2.board[i + sign * 4] == 0:
+                legal_moves += [i + sign * 4]
+            else:
+                pass
+        else:
+            legal_moves += [i + sign * (4 + k) for k in [0, 1] if class2.board[i + sign * (4 + k)] == 0]
 
     return legal_moves
 
-def check_moves_reverse(i, class2):
-    legal_moves = {}
 
-    if (i // 4) % 2 == 1:
-        if i % 4 == 3:
-            if class2.board[i - 4] == 0:
-                legal_moves[i] = [i - 4]
-            else:
-                legal_moves[i] = []
-        else:
-            legal_moves[i] = [i - 3 - k for k in [0, 1] if class2.board[i - 3 - k] == 0]
+def check_captures(i, self, class2):
+    legal_captures = []
+
+    if self.first:
+        reverse = 0
     else:
-        if i % 4 == 0:
-            if class2.board[i - 4] == 0:
-                legal_moves[i] = [i - 4]
-            else:
-                legal_moves[i] = []
-        else:
-            legal_moves[i] = [i - 4 - k for k in [0, 1] if class2.board[i - 4 - k] == 0]
+        reverse = -1
 
-    return legal_moves
+    sign = 1 + 2 * reverse
+    if (i // 4) % 2 == 0 - 3 * reverse:
+        if i % 4 == 0:
+            if class2.board[i + sign * 4] == 1 and class2.board[i + sign * 9] == 0:
+                legal_captures.append(i + sign * 4)
+            else:
+                pass
+        else:
+            tested = [i + sign * (3 + k / 2) for k in [0, 2] if
+                                 class2.board[i + sign * (3 + k / 2)] == 1 and class2.board[i + sign * (7 + k)] == 0]
+            for k in tested:
+                legal_captures += k
+    else:
+        if i % 4 == 3 + 3 * reverse:
+            if class2.board[i + sign * 4] == 1 and class2.board[i + sign * 9] == 0:
+                legal_captures.append(i + sign * 4)
+            else:
+                pass
+        else:
+            tested = [i + sign * (4 + k / 2) for k in [0, 2] if
+                                 class2.board[i + sign * (4 + k / 2)] == 1 and class2.board[i + sign * (7 + k)] == 0]
+            for k in tested:
+                legal_captures += k
+
+    return legal_captures
 
 class Checkers:
     def __init__(self, board, first):
         self.board = board
         self.first = first
 
+
     def legal_moves(self, class2):
         legal_moves = {}
 
-        if self.first:
-            for i in [k for k in self.board if self.board[k] != 0]:
-                check_moves(i, class2)
-        else:
-            for i in [k for k in self.board if self.board[k] != 0]:
-                check_moves_reverse(i, class2)
+
+        for i in [k for k in self.board if self.board[k] != 0]:
+            legal_moves[i] = check_moves(i, class2, self.first)
 
         return legal_moves
 
+    def captures(self, class2):
+        legal_captures = {}
+
+        for i in [k for k in self.board if self.board[k] != 0 and len(self.legal_moves(class2[k])) < 2]:
+            legal_captures[i] = check_captures(i, self, class2)
+
+        return legal_captures
 
 
 
