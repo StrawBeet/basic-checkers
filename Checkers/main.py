@@ -6,6 +6,14 @@ clock = pygame.time.Clock()
 running = True
 menu = True
 game_active = False
+bot = False
+settings = False
+
+mouse_pos = pygame.mouse.get_pos()
+
+brown = (54, 35, 18)
+beige = (247, 232, 208)
+dark_green = (25, 120, 12)
 
 font = pygame.font.Font(None, 50)
 title_font = pygame.font.Font(None, 100)
@@ -23,6 +31,29 @@ bot_surf.fill('black')
 
 title_text = title_font.render("Checkers", True, 'black')
 title_rect = title_text.get_rect(center = (screen.get_rect().centerx, 100))
+
+white_rects = []
+black_rects = []
+
+for i in range(8):
+    if i % 2 == 0:
+        white_rects.append(pygame.Rect(140, 32 + 100 * i, 100, 100))
+        black_rects.append(pygame.Rect(240, 32 + 100 * i, 100, 100))
+        white_rects.append(pygame.Rect(340, 32 + 100 * i, 100, 100))
+        black_rects.append(pygame.Rect(440, 32 + 100 * i, 100, 100))
+        white_rects.append(pygame.Rect(540, 32 + 100 * i, 100, 100))
+        black_rects.append(pygame.Rect(640, 32 + 100 * i, 100, 100))
+        white_rects.append(pygame.Rect(740, 32 + 100 * i, 100, 100))
+        black_rects.append(pygame.Rect(840, 32 + 100 * i, 100, 100))
+    else:
+        black_rects.append(pygame.Rect(140, 32 + 100 * i, 100, 100))
+        white_rects.append(pygame.Rect(240, 32 + 100 * i, 100, 100))
+        black_rects.append(pygame.Rect(340, 32 + 100 * i, 100, 100))
+        white_rects.append(pygame.Rect(440, 32 + 100 * i, 100, 100))
+        black_rects.append(pygame.Rect(540, 32 + 100 * i, 100, 100))
+        white_rects.append(pygame.Rect(640, 32 + 100 * i, 100, 100))
+        black_rects.append(pygame.Rect(740, 32 + 100 * i, 100, 100))
+        white_rects.append(pygame.Rect(840, 32 + 100 * i, 100, 100))
 
 def check_moves(i, class2, first):
     legal_moves = []
@@ -111,8 +142,6 @@ class Checkers:
 
         return legal_captures
 
-
-
 white_board = {}
 for i in range(32):
     if i < 12:
@@ -129,18 +158,52 @@ for i in range(32):
         black_board[31 - i] = 0
 blackCheckers = Checkers(black_board, False)
 
+def draw_pieces(white, black):
+    for i in [i for i in white if white[i] == 1]:
+        pygame.draw.circle(screen, (255, 255, 255), (190 + 200 * (i % 4) + 100 * ((i // 4) % 2),782 - 100 * (i // 4)), 40)
+
+    for i in [i for i in black if black[i] == 1]:
+        pygame.draw.circle(screen, 'Black', (190 + 200 * (i % 4) + 100 * ((i // 4) % 2), 782 - 100 * (i // 4)), 40)
+
+
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+        if event.type == pygame.MOUSEMOTION:
+            mouse_pos = pygame.mouse.get_pos()
 
-    screen.fill((25,120,12))
+    screen.fill(dark_green)
+    if menu:
+        if pygame.mouse.get_pressed()[0]:
+            if local_mult_rect.collidepoint(mouse_pos):
+                menu = False
+                game_active = True
+                bot = False
+            elif bot_rect.collidepoint(mouse_pos):
+                menu = False
+                game_active = True
+                bot = True
 
-    screen.blit(local_mult_surf, local_mult_rect)
-    screen.blit(local_mult_text, local_mult_text_rect)
-    screen.blit(bot_surf, bot_rect)
-    screen.blit(bot_text, bot_text_rect)
-    screen.blit(title_text, title_rect)
+        screen.blit(local_mult_surf, local_mult_rect)
+        screen.blit(local_mult_text, local_mult_text_rect)
+        screen.blit(bot_surf, bot_rect)
+        screen.blit(bot_text, bot_text_rect)
+        screen.blit(title_text, title_rect)
+    else:
+        if game_active:
+            for i in range(32):
+                pygame.draw.rect(screen, beige, white_rects[i])
+                pygame.draw.rect(screen, brown, black_rects[i])
+
+            draw_pieces(whiteCheckers.board, blackCheckers.board)
+            if not bot:
+                pass
+            else:
+                pass
+        else:
+            print("Unexpected game state")
+            running = False
 
     pygame.display.flip()
     clock.tick(60)
