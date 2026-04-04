@@ -105,50 +105,77 @@ def check_captures(i, self, class2):
     legal_captures = []
 
     if self.first:
-        reverse = 0
-    else:
-        reverse = -1
-    print("White pieces:", self.board)
-    print("Black pieces:", class2.board)
-    print("Type of i:", type(i), "i:", i)
-    sign = 1 + 2 * reverse
-    if (i // 4) % 2 == 0 - reverse:
-        print("(i // 4) % 2 == 0")
-        if i % 4 == 0 - 3 * reverse:
-            print("i % 4 == 0")
-            if class2.board[i + sign * 4] == 1 and class2.board[i + sign * 9] == 0 and self.board[i + sign * 9] == 0:
-                print("Checks passed")
-                new = i + sign * 4
-                legal_captures += [[new, new + sign * 5]]
-                legal_captures[len(legal_captures) - 1] += check_captures(new, self, class2)[0]
-            else:
-                return []
+        if i[0] < 2:
+            legal_captures += check_capture2(i, self, class2)
+            if len(check_capture2(i, self, class2)) > 0:
+                legal_captures += check_captures((i[0] + 2, i[1] + 2), self, class2)
+        elif i[0] > 5:
+            legal_captures += check_capture1(i, self, class2)
+            if len(check_capture1(i, self, class2)) > 0:
+                legal_captures += check_captures((i[0] - 2, i[1] + 2), self, class2)
         else:
-            passed = [i + sign * (3 + k / 2) for k in [0, 2] if
-                                 class2.board[i + sign * (3 + k / 2)] == 1 and class2.board[i + sign * (7 + k)] == 0 and self.board[i + sign * (7 + k) == 0]]
-            print("Passed:", passed)
-            for k in passed:
-                legal_captures += [[k, 2 * k - i + sign]]
-                legal_captures[len(legal_captures) - 1] += check_captures(2 * k - i + sign, self, class2)[0]
+            legal_captures += check_capture1(i, self, class2)
+            if len(check_capture1(i, self, class2)):
+                legal_captures += check_captures((i[0] - 2, i[1] + 2), self, class2)
 
+            legal_captures += check_capture2(i, self, class2)
+            if len(check_capture2(i, self, class2)):
+                legal_captures += check_captures((i[0] + 2, i[1] + 2), self, class2)
     else:
-        if i % 4 == 3 + 3 * reverse:
-            print("i % 4 == 3")
-            if class2.board[i + sign * 4] == 1 and class2.board[i + sign * 7] == 0 and self.board[i + sign * 7] == 0:
-                print("Checks passed")
-                new = i + sign * 4
-                legal_captures += [[new, new + sign * 3]]
-                legal_captures += check_captures(new, self, class2)[0]
-            else:
-                return []
+        if i[0] < 2:
+            legal_captures += check_capture4(i, self, class2)
+            if len(check_capture4(i, self, class2)) > 0:
+                legal_captures += check_captures((i[0] + 2, i[1] - 2), self, class2)
+        elif i[0] > 5:
+            legal_captures += check_capture3(i, self, class2)
+            if len(check_capture3(i, self, class2)) > 0:
+                legal_captures += check_captures((i[0] - 2, i[1] - 2), self, class2)
         else:
-            passed = [i + sign * (4 + k / 2) for k in [0, 2] if
-                                 class2.board[i + sign * (4 + k / 2)] == 1 and class2.board[i + sign * (9 + k)] == 0 and self.board[i + sign * (9 + k)] == 0]
-            print("Passed:", passed)
-            for k in passed:
-                legal_captures += [[k, 2 * k - i + sign]][0]
+            legal_captures += check_capture3(i, self, class2)
+            if len(check_capture3(i, self, class2)) > 0:
+                legal_captures += check_captures((i[0] - 2, i[1] - 2), self, class2)
+
+            legal_captures += check_capture4(i, self, class2)
+            if len(check_capture4(i, self, class2)) > 0:
+                legal_captures += check_captures((i[0] + 2, i[1] - 2), self, class2)
 
     return legal_captures
+
+def check_capture1(i, self, class2):
+    # This checks whether the piece can take to the top left
+
+    if class2.board[(i[0] - 1, i[1] + 1)] == 1:
+        if self.board[(i[0] - 2, i[1] + 2)] == 0 and class2.board[(i[0] - 2, i[1] + 2)] == 0:
+            return [((i[0] - 1, i[1] + 1), (i[0] - 2, i[1] + 2))]
+
+    return []
+
+def check_capture2(i, self, class2):
+    # This checks whether the piece can take to the top right
+
+    if class2.board[(i[0] + 1, i[1] + 1)] == 1:
+        if self.board[(i[0] + 2, i[1] + 2)] == 0 and class2.board[(i[0] + 2, i[1] + 2)] == 0:
+            return [((i[0] + 1, i[1] + 1), (i[0] + 2, i[1] + 2))]
+
+    return []
+
+def check_capture3(i, self, class2):
+    # This checks whether the piece can take to the bottom left
+
+    if class2.board[(i[0] - 1, i[1] - 1)] == 1:
+        if self.board[(i[0] - 2, i[2] - 2)] == 0 and class2.board[(i[0] - 2, i[1] - 2)] == 0:
+            return [((i[0] - 1, i[1] - 1), (i[0] - 2, i[1] - 2))]
+
+    return []
+
+def check_capture4(i, self, class2):
+    # This checks whether the piece can take to the bottom right
+
+    if class2.board[(i[0] + 1, i[1] - 1)] == 1:
+        if self.board[(i[0] + 2, i[2] - 2)] == 0 and class2.board[(i[0] + 2, i[1] - 2)] == 0:
+            return [((i[0] + 1, i[1] - 1), (i[0] + 2, i[1] - 2))]
+
+    return []
 
 class Checkers:
     # This class will be used to keep track of all the white and black pieces on the board
