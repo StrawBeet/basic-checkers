@@ -42,51 +42,61 @@ black_rects = []
 
 for i in range(8):
     if i % 2 == 0:
-        white_rects.append(pygame.Rect(140, 32 + 100 * i, 100, 100))
-        black_rects.append(pygame.Rect(240, 32 + 100 * i, 100, 100))
-        white_rects.append(pygame.Rect(340, 32 + 100 * i, 100, 100))
-        black_rects.append(pygame.Rect(440, 32 + 100 * i, 100, 100))
-        white_rects.append(pygame.Rect(540, 32 + 100 * i, 100, 100))
-        black_rects.append(pygame.Rect(640, 32 + 100 * i, 100, 100))
-        white_rects.append(pygame.Rect(740, 32 + 100 * i, 100, 100))
-        black_rects.append(pygame.Rect(840, 32 + 100 * i, 100, 100))
+        white_rects.append(pygame.Rect(140, 732 - 100 * i, 100, 100))
+        black_rects.append(pygame.Rect(240, 732 - 100 * i, 100, 100))
+        white_rects.append(pygame.Rect(340, 732 - 100 * i, 100, 100))
+        black_rects.append(pygame.Rect(440, 732 - 100 * i, 100, 100))
+        white_rects.append(pygame.Rect(540, 732 - 100 * i, 100, 100))
+        black_rects.append(pygame.Rect(640, 732 - 100 * i, 100, 100))
+        white_rects.append(pygame.Rect(740, 732 - 100 * i, 100, 100))
+        black_rects.append(pygame.Rect(840, 732 - 100 * i, 100, 100))
     else:
-        black_rects.append(pygame.Rect(140, 32 + 100 * i, 100, 100))
-        white_rects.append(pygame.Rect(240, 32 + 100 * i, 100, 100))
-        black_rects.append(pygame.Rect(340, 32 + 100 * i, 100, 100))
-        white_rects.append(pygame.Rect(440, 32 + 100 * i, 100, 100))
-        black_rects.append(pygame.Rect(540, 32 + 100 * i, 100, 100))
-        white_rects.append(pygame.Rect(640, 32 + 100 * i, 100, 100))
-        black_rects.append(pygame.Rect(740, 32 + 100 * i, 100, 100))
-        white_rects.append(pygame.Rect(840, 32 + 100 * i, 100, 100))
+        black_rects.append(pygame.Rect(140, 732 - 100 * i, 100, 100))
+        white_rects.append(pygame.Rect(240, 732 - 100 * i, 100, 100))
+        black_rects.append(pygame.Rect(340, 732 - 100 * i, 100, 100))
+        white_rects.append(pygame.Rect(440, 732 - 100 * i, 100, 100))
+        black_rects.append(pygame.Rect(540, 732 - 100 * i, 100, 100))
+        white_rects.append(pygame.Rect(640, 732 - 100 * i, 100, 100))
+        black_rects.append(pygame.Rect(740, 732 - 100 * i, 100, 100))
+        white_rects.append(pygame.Rect(840, 732 - 100 * i, 100, 100))
 
 def check_moves(i, class1, class2, first):
     # Returns all the legal moves for whichever piece is at i without including captures
     legal_moves = []
 
     if first:
-        reverse = 0
+        if i[0] - 1 < 0:
+            if class1.board[(i[0] + 1, i[1] + 1)] != 1 and class2.board[(i[0] + 1, i[1] + 1)] != 1:
+                legal_moves += [(i[0] + 1, i[1] + 1)]
+            else:
+                pass
+        elif i[0] + 1 > 7:
+            if class1.board[(i[0] - 1, i[1] + 1)] != 1 and class2.board[(i[0] - 1, i[1] + 1)] != 1:
+                legal_moves += [(i[0] - 1, i[1] + 1)]
+        else:
+            if class1.board[(i[0] - 1, i[1] + 1)] != 1 and class2.board[(i[0] - 1, i[1] + 1)] != 1:
+                legal_moves += [(i[0] - 1, i[1] + 1)]
+
+            if class1.board[(i[0] + 1, i[1] + 1)] != 1 and class2.board[(i[0] + 1, i[1] + 1)] != 1:
+                legal_moves += [(i[0] - 1, i[1] + 1)]
     else:
-        reverse = -1
-
-    sign = 1 + 2 * reverse
-
-    if (i // 4) % 2 == 0 - reverse:
-        if i % 4 == 0 - 3 * reverse:
-            if class2.board[i + sign * 4] == 0 and class1.board[i + sign * 4] == 0:
-                legal_moves += [i + sign * 4]
+        if i[0] - 1 < 0:
+            if class1.board[(i[0] + 1, i[1] - 1)] != 1 and class2.board[(i[0] + 1, i[1] - 1)] != 1:
+                legal_moves += [(i[0] + 1, i[1] - 1)]
+            else:
+                pass
+        elif i[0] + 1 > 7:
+            if class1.board[(i[0] - 1, i[1] - 1)] != 1 and class2.board[(i[0] - 1, i[1] - 1)] != 1:
+                legal_moves += [(i[0] - 1, i[1] - 1)]
             else:
                 pass
         else:
-            legal_moves += [i + sign * (3 + k) for k in [0, 1] if class2.board[i + sign * (3 + k)] == 0 and class1.board[i + sign * (3 + k)] == 0]
-    else:
-        if i % 4 == 3 + 3 * reverse:
-            if class2.board[i + sign * 4] == 0 and class1.board[i + sign * 4] == 0:
-                legal_moves += [i + sign * 4]
-            else:
-                pass
-        else:
-            legal_moves += [i + sign * (4 + k) for k in [0, 1] if class2.board[i + sign * (4 + k)] == 0 and class1.board[i + sign * (4 + k)] == 0]
+            if class1.board[(i[0] - 1, i[1] - 1)] != 1 and class2.board[(i[0] - 1, i[1] - 1)] != 1:
+                legal_moves += [(i[0] - 1, i[1] - 1)]
+
+            if class1.board[(i[0] + 1, i[1] - 1)] != 1 and class2.board[(i[0] + 1, i[1] - 1)] != 1:
+                legal_moves += [(i[0] + 1, i[1] - 1)]
+
 
     return legal_moves
 
@@ -151,12 +161,8 @@ class Checkers:
         legal_moves = {}
 
 
-        for i in [k for k in self.board if self.board[k] != 0]:
+        for i in [k for k in self.board if self.board[k] != 0 and self.board[k] != -1]:
             legal_moves[i] = check_moves(i, self, class2, self.first)
-
-        for i in range(32):
-            if i not in legal_moves.copy().keys():
-                legal_moves[i] = []
 
         return legal_moves
 
@@ -172,30 +178,42 @@ class Checkers:
         return legal_captures
 
 white_board = {}
-for i in range(32):
-    if i < 12:
-        white_board[i] = 1
-    else:
-        white_board[i] = 0
+for i in range(8):
+    for k in range(8):
+        if k % 2 == 0 and i % 2 == 1:
+            white_board[(i,k)] = -1
+        elif k % 2 == 1 and i % 2 == 0:
+            white_board[(i,k)] = -1
+        else:
+            if k * 8 + i < 23:
+                white_board[(i,k)] = 1
+            else:
+                white_board[(i,k)] = 0
 whiteCheckers = Checkers(white_board, True)
 
 black_board = {}
-for i in range(32):
-    if i < 12:
-        black_board[31 - i] = 1
-    else:
-        black_board[31 - i] = 0
+for i in range(8):
+    for k in range(8):
+        if k % 2 == 0 and i % 2 == 1:
+            black_board[(i,k)] = -1
+        elif k % 2 == 1 and i % 2 == 0:
+            black_board[(i,k)] = -1
+        else:
+            if k * 8 + i > 39:
+                black_board[(i,k)] = 1
+            else:
+                black_board[(i,k)] = 0
 blackCheckers = Checkers(black_board, False)
 
 def draw_pieces(white, black):
     # Draws all the checkers pieces that are on the board
     for i in [i for i in white if white[i] == 1]:
-        pygame.draw.circle(screen, 'White', (190 + 200 * (i % 4) + 100 * ((i // 4) % 2),782 - 100 * (i // 4)), 40)
-        pygame.draw.circle(screen, 'Black', (190 + 200 * (i % 4) + 100 * ((i // 4) % 2),782 - 100 * (i // 4)), 40, 1)
+        pygame.draw.circle(screen, 'White', (190 + 200 * i[0] + 100 * (i[1] % 2),782 - 100 * i[1]), 40)
+        pygame.draw.circle(screen, 'Black', (190 + 200 * i[0] + 100 * (i[1] % 2),782 - 100 * i[1]), 40, 1)
 
     for i in [i for i in black if black[i] == 1]:
-        pygame.draw.circle(screen, 'Black', (190 + 200 * (i % 4) + 100 * ((i // 4) % 2), 782 - 100 * (i // 4)), 40)
-        pygame.draw.circle(screen, 'White', (190 + 200 * (i % 4) + 100 * ((i // 4) % 2), 782 - 100 * (i // 4)), 40, 1)
+        pygame.draw.circle(screen, 'Black', (190 + 200 * i[0] + 100 * (i[1] % 2), 782 - 100 * i[1]), 40)
+        pygame.draw.circle(screen, 'White', (190 + 200 * i[0] + 100 * (i[1] % 2), 782 - 100 * i[1]), 40, 1)
 
 def draw_moves(white, black, square):
     moves = white.captures(black)[square]
@@ -277,16 +295,19 @@ while running:
                 for i in range(32):
                     # Checks whether the mouse collides with where a piece could be. There cannot be any pieces on the white squares
                     if black_rects[i].scale_by(0.8).collidepoint(mouse_pos):
-                        being_moved = 28 - 4 * (i // 4) + i % 4
+                        if (i // 4) % 2 == 0:
+                            being_moved = ((i % 4) * 2, i // 4)
+                        else:
+                            being_moved = ((i % 2) * 2 + 1, i // 4)
                         for k in previous_moves:
                             #The equation below comes from the fact that the pieces are numbered from left
                             #to right starting from the bottom of the board while the black_rects list is
                             #numbered starting from the top left"""
-                            pygame.draw.rect(screen, brown, black_rects[28 - 4 * (k // 4) + k % 4])
+                            pygame.draw.rect(screen, brown, black_rects[k[0] + k[1] * 8])
                         if turn % 2 == 0:
-                            draw_moves(whiteCheckers, blackCheckers, 28 - 4 * (i // 4) + i % 4)
+                            draw_moves(whiteCheckers, blackCheckers, being_moved)
                         else:
-                            draw_moves(blackCheckers, whiteCheckers, 28 - 4 * (i // 4) + i % 4)
+                            draw_moves(blackCheckers, whiteCheckers, being_moved)
 
                     else:
                         if previous_moves == []:
@@ -296,9 +317,9 @@ while running:
                     if turn % 2 == 0:
                         if pygame.mouse.get_pressed()[0]:
                             for k in previous_moves:
-                                if black_rects[28 - 4 * (k // 4) + k % 4].scale_by(0.7).collidepoint(mouse_pos):
+                                if black_rects[k[0] + [1] * 8].scale_by(0.7).collidepoint(mouse_pos):
                                     whiteCheckers = move(whiteCheckers, previous_chosen, k)
-                                    pygame.draw.rect(screen, brown, black_rects[28 - 4 * (previous_chosen // 4) + previous_chosen % 4])
+                                    pygame.draw.rect(screen, brown, black_rects[previous_chosen[0] + previous_chosen[1] * 8])
                                     draw_pieces(whiteCheckers.board, blackCheckers.board)
                                     turn_end = True
                                 else:
