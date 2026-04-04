@@ -11,6 +11,7 @@ settings = False
 turn = 0
 turn_end = False
 
+capturing = False
 capture_possible = False
 captured = False
 previous_chosen = -1
@@ -406,15 +407,13 @@ def draw_moves(white, black, square):
     moves = white.captures(black)[square]
     # The code below draws the possible moves if you clicked on a piece
     if white.board[square] == 1:
-        if len(moves) == 0:
+        if len([k for k in white.captures(black) if white.captures(black)[k] != []]) == 0:
             moves = white.legal_moves(black)[square]
             for i in moves:
                 pygame.draw.circle(screen, (0, 0, 255, 180), (190 + 100 * i[0], 782 - 100 * i[1]), 20)
                 pygame.draw.circle(screen, 'White', (190 + 100 * i[0], 782 - 100 * i[1]), 20,
                                    1)
-        else:
-            print("Captures exist!")
-            print(moves)
+        elif len(moves) > 0:
             for i in moves:
                 pygame.draw.circle(screen, (0, 0, 255, 180), (190 + 100 * i[1][0],
                                                               782 - 100 * i[1][1]), 20)
@@ -437,15 +436,32 @@ def move(color, moved, move_to):
 def capture(color1, color2, moved, captured, move_to):
     """Moved indicates the piece moves, captures is a list indicating all the captured pieces, move_to indicates
     where the piece moves, color1 represents the color whose turn it is and color2 represents the other player"""
-    for i in captured:
-        color2.board[i] = 0
+    capturing = True
+
+    color2.board[captured] = 0
     color1.board[move_to] = color1.board[moved]
     color1.board[moved] = 0
+
+    possibilities = color1.captures(color2)[move_to]
+
+    while capturing:
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_s:
+                    capturing = False
+
+        if len(color1.captures(color2)[move_to]) == 0:
+            capturing = False
+        else:
+            draw_moves(color1, color2, move_to)
+            if pygame.mouse.get_pressed()[0]:
+                for i in range(32):
+                    pass
+
     return color1, color2
 
 
-print("White:", whiteCheckers.board)
-print("Black:", blackCheckers.board)
+
 screen.fill(dark_green) # So that the screen isn't filled too many times every second
 while running:
     for event in pygame.event.get():
@@ -479,8 +495,6 @@ while running:
     else:
         if game_active:
             if pygame.mouse.get_pressed()[0]:
-                print("White pieces:", whiteCheckers.board)
-                print("Black pieces:", blackCheckers.board)
                 for i in range(32):
                     # Checks whether the mouse collides with where a piece could be. There cannot be any pieces on the white squares
                     if black_rects[i].scale_by(0.8).collidepoint(mouse_pos):
@@ -490,7 +504,6 @@ while running:
                             being_moved = ((i % 4) * 2 + 1, i // 4)
                         print("Being moved:", being_moved)
                         for k in previous_moves:
-
                             if k[1] % 2 == 0:
                                 pygame.draw.rect(screen, brown, black_rects[int((k[0] / 2) + 4 * k[1])])
                             else:
@@ -510,7 +523,7 @@ while running:
                             for k in previous_moves:
                                 if black_rects[int((k[0] - k[0] % 2) / 2 + 4 * k[1])].scale_by(0.7).collidepoint(mouse_pos):
                                     if capture:
-                                        whiteCheckers = capture(whiteCheckers, blackCheckers, )
+                                        whiteCheckers, blackCheckers = capture(whiteCheckers, blackCheckers, previous_chosen, )
                                     else:
                                         whiteCheckers = move(whiteCheckers, previous_chosen, k)
                                         pygame.draw.rect(screen, brown, black_rects[int((previous_chosen[0] - previous_chosen[0] % 2) / 2 + 4 * previous_chosen[1])])
