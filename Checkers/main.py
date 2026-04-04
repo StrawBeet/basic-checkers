@@ -134,7 +134,7 @@ def check_capture1(i, self, class2):
     if i[1] < 6:
         if class2.board[(i[0] - 1, i[1] + 1)] == 1:
             if self.board[(i[0] - 2, i[1] + 2)] == 0 and class2.board[(i[0] - 2, i[1] + 2)] == 0:
-                return [((i[0] - 1, i[1] + 1), (i[0] - 2, i[1] + 2))]
+                return [[(i[0] - 1, i[1] + 1), (i[0] - 2, i[1] + 2)]]
 
     return []
 
@@ -143,7 +143,7 @@ def check_capture2(i, self, class2):
     if i[1] < 6:
         if class2.board[(i[0] + 1, i[1] + 1)] == 1:
             if self.board[(i[0] + 2, i[1] + 2)] == 0 and class2.board[(i[0] + 2, i[1] + 2)] == 0:
-                return [((i[0] + 1, i[1] + 1), (i[0] + 2, i[1] + 2))]
+                return [[(i[0] + 1, i[1] + 1), (i[0] + 2, i[1] + 2)]]
 
     return []
 
@@ -152,7 +152,7 @@ def check_capture3(i, self, class2):
     if i[1] > 1:
         if class2.board[(i[0] - 1, i[1] - 1)] == 1:
             if self.board[(i[0] - 2, i[1] - 2)] == 0 and class2.board[(i[0] - 2, i[1] - 2)] == 0:
-                return [((i[0] - 1, i[1] - 1), (i[0] - 2, i[1] - 2))]
+                return [[(i[0] - 1, i[1] - 1), (i[0] - 2, i[1] - 2)]]
 
     return []
 
@@ -161,7 +161,7 @@ def check_capture4(i, self, class2):
     if i[1] > 1:
         if class2.board[(i[0] + 1, i[1] - 1)] == 1:
             if self.board[(i[0] + 2, i[1] - 2)] == 0 and class2.board[(i[0] + 2, i[1] - 2)] == 0:
-                return [((i[0] + 1, i[1] - 1), (i[0] + 2, i[1] - 2))]
+                return [[(i[0] + 1, i[1] - 1), (i[0] + 2, i[1] - 2)]]
 
     return []
 
@@ -337,8 +337,6 @@ for i in range(8):
 blackCheckers = Checkers(black_board, False)
 
 def promote():
-    print(whiteCheckers.board)
-    print(blackCheckers.board)
     for i in whiteCheckers.board:
         if i[1] == 7 and whiteCheckers.board[i] == 1:
             whiteCheckers.board[i] = 3
@@ -394,7 +392,6 @@ def draw_board():
 def move(color, moved, move_to):
     """Moved indicated the piece moved while move indicates where it moves to"""
     color.board[moved] = 0
-    print("Moved:", moved)
     color.board[move_to] = 1
     return color
 
@@ -402,7 +399,6 @@ def captures(color1, color2, moved, captured, move_to):
     """Moved indicates the piece moves, captures is a list indicating all the captured pieces, move_to indicates
     where the piece moves, color1 represents the color whose turn it is and color2 represents the other player"""
     capturing = True
-
     color2.board[captured] = 0
     color1.board[move_to] = color1.board[moved]
     color1.board[moved] = 0
@@ -410,26 +406,37 @@ def captures(color1, color2, moved, captured, move_to):
     possibilities = color1.captures(color2)[move_to]
     print("Possibilities:", possibilities)
     previous = move_to
+    print("Moved:", moved)
+    print("Captured:", captured)
+    print("Move_to:",move_to)
+
+    if len(possibilities) == 0:
+        return color1, color2
+
+    for i in range(32):
+        pygame.draw.rect(screen, beige, white_rects[i])
+        pygame.draw.rect(screen, brown, black_rects[i])
+    if color1.first:
+        draw_pieces(color1.board, color2.board)
+    else:
+        draw_pieces(color2.board, color1.board)
     while capturing:
-        print("Capturing")
+        print("Running loop")
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_s:
                     capturing = False
 
-        if len(possibilities) == 0:
-            break
-        else:
-            draw_moves(color1, color2, move_to)
-            if pygame.mouse.get_pressed()[0]:
-                for i in range(32):
-                    for k in possibilities:
-                        if black_rects[int((k[0] - k[0] % 2) / 2 + 4 * k[1])].scale_by(0.7).collidepoint(mouse_pos):
-                            color2.board[k[0]] = 0
-                            color1.board[k[1]] = color1.board[previous]
-                            color1.board[previous] = 0
-                            previous = k[1]
-                            draw_board()
+        draw_moves(color1, color2, move_to)
+        if pygame.mouse.get_pressed()[0]:
+            for i in range(32):
+                for k in possibilities[0]:
+                    if black_rects[int((k[0] - k[0] % 2) / 2 + 4 * k[1])].scale_by(0.7).collidepoint(mouse_pos):
+                        color2.board[k[0]] = 0
+                        color1.board[k[1]] = color1.board[previous]
+                        color1.board[previous] = 0
+                        previous = k[1]
+                        draw_board()
 
     return color1, color2
 
@@ -442,6 +449,18 @@ while running:
             running = False
         if event.type == pygame.MOUSEMOTION:
             mouse_pos = pygame.mouse.get_pos()
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_k:
+                print("White board:", whiteCheckers.board)
+                print("White moves:", whiteCheckers.legal_moves(blackCheckers))
+                print("White captures:", whiteCheckers.captures(blackCheckers))
+                print("Black board:", blackCheckers.board)
+                print("Black moves:", blackCheckers.legal_moves(whiteCheckers))
+                print("Black captures:", blackCheckers.captures(whiteCheckers))
+                print("Previous moves:", previous_moves)
+                print("Previous chosen:", previous_chosen)
+                print("Captures:", capture)
+                print("Being moved:", being_moved)
 
 
     if menu:
@@ -470,7 +489,6 @@ while running:
             #print("Previous:",previous_chosen, previous_moves)
             #print(capture)
             if pygame.mouse.get_pressed()[0]:
-                print(blackCheckers.board)
                 for i in range(32):
                     # Checks whether the mouse collides with where a piece could be. There cannot be any pieces on the white squares
                     if black_rects[i].scale_by(0.8).collidepoint(mouse_pos):
@@ -478,8 +496,6 @@ while running:
                             being_moved = ((i % 4) * 2, i // 4)
                         else:
                             being_moved = ((i % 4) * 2 + 1, i // 4)
-                        print("Being moved:", being_moved)
-                        print(((2,4),) in blackCheckers.board)
                         for k in previous_moves:
                             if k[1] % 2 == 0:
                                 pygame.draw.rect(screen, brown, black_rects[int((k[0] / 2) + 4 * k[1])])
@@ -499,23 +515,24 @@ while running:
                         if pygame.mouse.get_pressed()[0]:
                             for k in previous_moves:
                                 if black_rects[int((k[0] - k[0] % 2) / 2 + 4 * k[1])].scale_by(0.7).collidepoint(mouse_pos):
-                                    print("White")
                                     if capture:
-                                        print("Capturing")
                                         whiteCheckers, blackCheckers = captures(whiteCheckers, blackCheckers, previous_chosen, capture, k)
+                                        turn_end = True
                                         capture = []
                                     else:
-                                        print("Moving")
                                         whiteCheckers = move(whiteCheckers, previous_chosen, k)
-                                        pygame.draw.rect(screen, brown, black_rects[int((previous_chosen[0] - previous_chosen[0] % 2) / 2 + 4 * previous_chosen[1])])
+                                        #pygame.draw.rect(screen, brown, black_rects[int((previous_chosen[0] - previous_chosen[0] % 2) / 2 + 4 * previous_chosen[1])])
+                                        draw_board()
                                         draw_pieces(whiteCheckers.board, blackCheckers.board)
                                         turn_end = True
                                 else:
                                     pass
                             if being_moved:
                                 for j in whiteCheckers.captures(blackCheckers).copy()[being_moved]:
-                                    capture = j[0:len(j) - 1]
-                                    previous_moves = [j[-1]]
+                                    capture = j[0:len(j) - 1][0]
+                                    previous_moves = j[-1:]
+                                if capture == []:
+                                    previous_moves = []
                                 if len(previous_moves) == 0:
                                     previous_moves = whiteCheckers.legal_moves(blackCheckers).copy()[being_moved]
                                 else:
@@ -537,25 +554,24 @@ while running:
                         if pygame.mouse.get_pressed()[0]:
                             for k in previous_moves:
                                 if black_rects[int((k[0] - k[0] % 2) / 2 + 4 * k[1])].scale_by(0.7).collidepoint(mouse_pos):
-                                    print("Black")
                                     if capture:
-                                        print("Capturing")
                                         blackCheckers, whiteCheckers = captures(blackCheckers, whiteCheckers, previous_chosen, capture, k)
+                                        turn_end = True
                                         capture = []
                                     else:
-                                        print("Moving")
                                         blackCheckers = move(blackCheckers, previous_chosen, k)
-                                        pygame.draw.rect(screen, brown, black_rects[int((previous_chosen[0] - previous_chosen[0] % 2) / 2 + 4 * previous_chosen[1])])
+                                        #pygame.draw.rect(screen, brown, black_rects[int((previous_chosen[0] - previous_chosen[0] % 2) / 2 + 4 * previous_chosen[1])])
+                                        draw_board()
                                         draw_pieces(whiteCheckers.board, blackCheckers.board)
                                         turn_end = True
                                 else:
                                     pass
                             if being_moved:
-                                for j in whiteCheckers.captures(blackCheckers).copy()[being_moved]:
-                                    capture = j[0:len(j) - 1]
+                                for j in blackCheckers.captures(whiteCheckers).copy()[being_moved]:
+                                    capture = j[0:len(j) - 1][0]
                                     previous_moves = j[-1:]
                                 if len(previous_moves) == 0:
-                                    previous_moves = whiteCheckers.legal_moves(blackCheckers).copy()[being_moved]
+                                    previous_moves = blackCheckers.legal_moves(whiteCheckers).copy()[being_moved]
                                 else:
                                     capture_possible = True
                             else:
