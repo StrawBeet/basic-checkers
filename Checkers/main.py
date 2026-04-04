@@ -13,6 +13,7 @@ turn_end = False
 
 previous_chosen = -1
 being_moved = 0
+capture = []
 previous_moves = []
 mouse_pos = pygame.mouse.get_pos()
 
@@ -143,39 +144,109 @@ def check_captures(i, self, class2):
 
 def check_capture1(i, self, class2):
     # This checks whether the piece can take to the top left
-    print("Checking captured to the top left")
-    if class2.board[(i[0] - 1, i[1] + 1)] == 1:
-        if self.board[(i[0] - 2, i[1] + 2)] == 0 and class2.board[(i[0] - 2, i[1] + 2)] == 0:
-            return [((i[0] - 1, i[1] + 1), (i[0] - 2, i[1] + 2))]
+    if i[1] < 6:
+        if class2.board[(i[0] - 1, i[1] + 1)] == 1:
+            if self.board[(i[0] - 2, i[1] + 2)] == 0 and class2.board[(i[0] - 2, i[1] + 2)] == 0:
+                return [((i[0] - 1, i[1] + 1), (i[0] - 2, i[1] + 2))]
 
     return []
 
 def check_capture2(i, self, class2):
     # This checks whether the piece can take to the top right
-    print("Checking captured to the top right")
-    if class2.board[(i[0] + 1, i[1] + 1)] == 1:
-        if self.board[(i[0] + 2, i[1] + 2)] == 0 and class2.board[(i[0] + 2, i[1] + 2)] == 0:
-            return [((i[0] + 1, i[1] + 1), (i[0] + 2, i[1] + 2))]
+    if i[1] < 6:
+        if class2.board[(i[0] + 1, i[1] + 1)] == 1:
+            if self.board[(i[0] + 2, i[1] + 2)] == 0 and class2.board[(i[0] + 2, i[1] + 2)] == 0:
+                return [((i[0] + 1, i[1] + 1), (i[0] + 2, i[1] + 2))]
 
     return []
 
 def check_capture3(i, self, class2):
     # This checks whether the piece can take to the bottom left
-    print("Checking captured to the bottom left")
-    if class2.board[(i[0] - 1, i[1] - 1)] == 1:
-        if self.board[(i[0] - 2, i[1] - 2)] == 0 and class2.board[(i[0] - 2, i[1] - 2)] == 0:
-            return [((i[0] - 1, i[1] - 1), (i[0] - 2, i[1] - 2))]
+    if i[1] > 1:
+        if class2.board[(i[0] - 1, i[1] - 1)] == 1:
+            if self.board[(i[0] - 2, i[1] - 2)] == 0 and class2.board[(i[0] - 2, i[1] - 2)] == 0:
+                return [((i[0] - 1, i[1] - 1), (i[0] - 2, i[1] - 2))]
 
     return []
 
 def check_capture4(i, self, class2):
     # This checks whether the piece can take to the bottom right
-    print("Checking captures to the bottom right")
-    if class2.board[(i[0] + 1, i[1] - 1)] == 1:
-        if self.board[(i[0] + 2, i[1] - 2)] == 0 and class2.board[(i[0] + 2, i[1] - 2)] == 0:
-            return [((i[0] + 1, i[1] - 1), (i[0] + 2, i[1] - 2))]
+    if i[1] > 1:
+        if class2.board[(i[0] + 1, i[1] - 1)] == 1:
+            if self.board[(i[0] + 2, i[1] - 2)] == 0 and class2.board[(i[0] + 2, i[1] - 2)] == 0:
+                return [((i[0] + 1, i[1] - 1), (i[0] + 2, i[1] - 2))]
 
     return []
+
+def moves_king(i, self, class2):
+    legal_moves = []
+
+    if i[1] == 7:
+        if i[0] == 0:
+            if self.board[(1, i[1] - 1)] == 0 and class2.board[(1, i[1] - 1)] == 0:
+                legal_moves += [(1, i[1] - 1)]
+        elif i[0] == 7:
+            if self.board[(6, i[1] - 1)] == 0 and class2.board[(6, i[1] - 1)] == 0:
+                legal_moves += [(6, i[1] - 1)]
+        else:
+            if self.board[(i[0] + 1, i[1] - 1)] == 0 and class2.board[(1, i[1] - 1)] == 0:
+                legal_moves += [(1, i[1] - 1)]
+            if self.board[(i[0] - 1, i[1] - 1)] == 0 and class2.board[(6, i[1] - 1)] == 0:
+                legal_moves += [(6, i[1] - 1)]
+    elif i[1] == 0:
+        if i[0] == 0:
+            if self.board[(1, i[1] + 1)] == 0 and class2.board[(1, i[1] + 1)] == 0:
+                legal_moves += [(1, i[1] + 1)]
+        elif i[0] == 7:
+            if self.board[(6, i[1] + 1)] == 0 and class2.board[(6, i[1] + 1)] == 0:
+                legal_moves += [(6, i[1] + 1)]
+        else:
+            if self.board[(i[0] + 1, i[1] + 1)] == 0 and class2.board[(1, i[1] + 1)] == 0:
+                legal_moves += [(1, i[1] + 1)]
+            if self.board[(i[0] - 1, i[1] + 1)] == 0 and class2.board[(6, i[1] + 1)] == 0:
+                legal_moves += [(6, i[1] + 1)]
+    else:
+        if i[0] == 0:
+            if self.board[(1, i[1] - 1)] == 0 and class2.board[(1, i[1] - 1)] == 0:
+                legal_moves += [(1, i[1] - 1)]
+            if self.board[(1, i[1] + 1)] == 0 and class2.board[(1, i[1] + 1)] == 0:
+                legal_moves += [(1, i[1] + 1)]
+        elif i[0] == 7:
+            if self.board[(6, i[1] - 1)] == 0 and class2.board[(6, i[1] - 1)] == 0:
+                legal_moves += [(6, i[1] - 1)]
+            if self.board[(6, i[1] + 1)] == 0 and class2.board[(6, i[1] + 1)] == 0:
+                legal_moves += [(6, i[1] + 1)]
+        else:
+            if self.board[(i[0] + 1, i[1] - 1)] == 0 and class2.board[(1, i[1] - 1)] == 0:
+                legal_moves += [(1, i[1] - 1)]
+            if self.board[(i[0] - 1, i[1] - 1)] == 0 and class2.board[(6, i[1] - 1)] == 0:
+                legal_moves += [(6, i[1] - 1)]
+            if self.board[(i[0] + 1, i[1] + 1)] == 0 and class2.board[(1, i[1] + 1)] == 0:
+                legal_moves += [(1, i[1] + 1)]
+            if self.board[(i[0] - 1, i[1] + 1)] == 0 and class2.board[(6, i[1] + 1)] == 0:
+                legal_moves += [(6, i[1] + 1)]
+
+    return legal_moves
+
+def captures_king(i, self, class2):
+    legal_captures = []
+    if i[1] < 2:
+        if i[0] < 2:
+            pass
+        elif i[0] > 5:
+            pass
+        else:
+            pass
+    elif i[1] > 5:
+        if i[0] < 2:
+            pass
+        elif i[0] > 5:
+            pass
+        else:
+            pass
+    else:
+        pass
+
 
 class Checkers:
     # This class will be used to keep track of all the white and black pieces on the board
@@ -235,6 +306,15 @@ for i in range(8):
                 black_board[(i,k)] = 0
 blackCheckers = Checkers(black_board, False)
 
+def promote():
+    for i in whiteCheckers.board:
+        if i[1] == 7 and whiteCheckers.board[i] == 1:
+            whiteCheckers.board[i] = 3
+
+    for i in blackCheckers.board:
+        if i[1] == 0 and whiteCheckers.board[i] == 1:
+            blackCheckers.board[i] = 3
+
 def draw_pieces(white, black):
     # Draws all the checkers pieces that are on the board
     for i in [i for i in white if white[i] == 1]:
@@ -244,6 +324,16 @@ def draw_pieces(white, black):
     for i in [i for i in black if black[i] == 1]:
         pygame.draw.circle(screen, 'Black', (190 + 100 * i[0], 782 - 100 * i[1]), 40)
         pygame.draw.circle(screen, 'White', (190 + 100 * i[0], 782 - 100 * i[1]), 40, 1)
+
+    for i in [i for i in white if white[i] == 3]:
+        pygame.draw.circle(screen, 'White', (190 + 100 * i[0], 782 - 100 * i[1]), 40)
+        pygame.draw.circle(screen, 'Black', (190 + 100 * i[0], 782 - 100 * i[1]), 40, 1)
+        pygame.draw.circle(screen, 'Black', (190 + 100 * i[0], 782 - 100 * i[1]), 10, 5)
+
+    for i in [i for i in black if black[i] == 3]:
+        pygame.draw.circle(screen, 'Black', (190 + 100 * i[0], 782 - 100 * i[1]), 40)
+        pygame.draw.circle(screen, 'White', (190 + 100 * i[0], 782 - 100 * i[1]), 40, 1)
+        pygame.draw.circle(screen, 'White', (190 + 100 * i[0], 782 - 100 * i[1]), 10, 5)
 
 def draw_moves(white, black, square):
     moves = white.captures(black)[square]
@@ -280,10 +370,10 @@ def move(color, moved, move_to):
 def capture(color1, color2, moved, captured, move_to):
     """Moved indicates the piece moves, captures is a list indicating all the captured pieces, move_to indicates
     where the piece moves, color1 represents the color whose turn it is and color2 represents the other player"""
-    color1.board[moved] = 0
     for i in captured:
         color2.board[i] = 0
-    color1.board[move_to] = 1
+    color1.board[move_to] = color1.board[moved]
+    color1.board[moved] = 0
     return color1, color2
 
 
@@ -333,9 +423,7 @@ while running:
                             being_moved = ((i % 4) * 2 + 1, i // 4)
                         print("Being moved:", being_moved)
                         for k in previous_moves:
-                            #The equation below comes from the fact that the pieces are numbered from left
-                            #to right starting from the bottom of the board while the black_rects list is
-                            #numbered starting from the top left
+
                             if k[1] % 2 == 0:
                                 pygame.draw.rect(screen, brown, black_rects[int((k[0] / 2) + 4 * k[1])])
                             else:
@@ -361,7 +449,11 @@ while running:
                                 else:
                                     pass
                             if being_moved:
-                                previous_moves = whiteCheckers.legal_moves(blackCheckers).copy()[being_moved]
+                                for j in whiteCheckers.captures(blackCheckers).copy()[being_moved]:
+                                    capture = j[0:len(j) - 1]
+                                    previous_moves = j[-1:]
+                                if len(previous_moves) == 0:
+                                    previous_moves = whiteCheckers.legal_moves(blackCheckers).copy()[being_moved]
                                 print("Previous moves:", previous_moves)
                             else:
                                 pass
@@ -369,6 +461,7 @@ while running:
                             print("Previous chosen:", previous_chosen)
                             if turn_end:
                                 print("Turn end")
+                                capture = []
                                 previous_moves = []
                                 previous_chosen = -1
                                 turn = (turn + 1) % 2
