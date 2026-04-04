@@ -396,7 +396,8 @@ def move(color, moved, move_to):
     return color
 
 def captures(color1, color2, moved, captured, move_to):
-    """Moved indicates the piece moves, captures is a list indicating all the captured pieces, move_to indicates
+    global mouse_pos
+    """Moved indicates the piece moved, captures is a list indicating all the captured pieces, move_to indicates
     where the piece moves, color1 represents the color whose turn it is and color2 represents the other player"""
     capturing = True
     color2.board[captured] = 0
@@ -420,23 +421,35 @@ def captures(color1, color2, moved, captured, move_to):
         draw_pieces(color1.board, color2.board)
     else:
         draw_pieces(color2.board, color1.board)
+    pygame.display.flip()
     while capturing:
-        print("Running loop")
         for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                exit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_s:
                     capturing = False
-
-        draw_moves(color1, color2, move_to)
+            if event.type == pygame.MOUSEMOTION:
+                mouse_pos = pygame.mouse.get_pos()
+        if len(possibilities) == 0:
+            break
+        draw_moves(color1, color2, previous)
+        pygame.display.flip()
         if pygame.mouse.get_pressed()[0]:
+            print("Possibilities:", possibilities)
+            print(color1.board)
+            print(color2.board)
+            print("Previous:", previous)
             for i in range(32):
-                for k in possibilities[0]:
-                    if black_rects[int((k[0] - k[0] % 2) / 2 + 4 * k[1])].scale_by(0.7).collidepoint(mouse_pos):
+                for k in possibilities:
+                    if black_rects[int((k[1][0] - k[1][0] % 2) / 2 + 4 * k[1][1])].scale_by(0.7).collidepoint(mouse_pos):
+                        print("Moved")
                         color2.board[k[0]] = 0
                         color1.board[k[1]] = color1.board[previous]
                         color1.board[previous] = 0
                         previous = k[1]
                         draw_board()
+                        possibilities = color1.captures(color2)[previous]
 
     return color1, color2
 
