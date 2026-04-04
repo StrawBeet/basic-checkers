@@ -11,6 +11,8 @@ settings = False
 turn = 0
 turn_end = False
 
+capture_possible = False
+captured = False
 previous_chosen = -1
 being_moved = 0
 capture = []
@@ -230,22 +232,86 @@ def moves_king(i, self, class2):
 
 def captures_king(i, self, class2):
     legal_captures = []
+
     if i[1] < 2:
         if i[0] < 2:
-            pass
+            if class2.board[(i[0] + 1, i[1] + 1)] == 1:
+                if self.board[(i[0] + 2, i[1] + 2)] == 0 and class2.board[(i[0] + 2, i[1] + 2)] == 0:
+                    legal_captures += [((i[0] + 1, i[1] + 1), (i[0] + 2, i[1] + 2))]
+                    changes_1, changes_2 = capture(self, class2, i, [(i[0] + 1, i[1] + 1)], (i[0] + 2, i[1] + 2))
+                    legal_captures += captures_king((i[0] + 2, i[1] + 2), changes_1, changes_2)
         elif i[0] > 5:
-            pass
+            if class2.board[(i[0] - 1, i[1] + 1)] == 1:
+                if self.board[(i[0] - 2, i[1] + 2)] == 0 and class2.board[(i[0] - 2, i[2] + 2)] == 0:
+                    legal_captures += [((i[0] - 1, i[1] + 1), (i[0] - 2, i[1] + 2))]
+                    changes_1, changes_2 = capture(self, class2, i, [(i[0] - 1, i[1] + 1)], (i[0] - 2, i[1] + 2))
+                    legal_captures += captures_king((i[0] - 2, i[1] + 2), changes_1, changes_2)
         else:
-            pass
+            if i[0] < 2:
+                if class2.board[(i[0] + 1, i[1] + 1)] == 1:
+                    if self.board[(i[0] + 2, i[1] + 2)] == 0 and class2.board[(i[0] + 2, i[1] + 2)] == 0:
+                        legal_captures += [((i[0] + 1, i[1] + 1), (i[1] + 2, i[1] + 2))]
+                        changes_1, changes_2 = capture(self, class2, i, [(i[0] + 1, i[1] + 1)], (i[0] + 2, i[1] + 2))
+                        legal_captures += captures_king((i[0] + 2, i[1] + 2), changes_1, changes_2)
+
+                if class2.board[(i[0] - 1, i[1] + 1)] == 1:
+                    if self.board[(i[0] - 2, i[1] + 2)] == 0 and class2.board[(i[0] - 2, i[2] + 2)] == 0:
+                        legal_captures += [((i[0] - 1, i[1] + 1), (i[0] - 2, i[1] + 2))]
+                        changes_1, changes_2 = capture(self, class2, i, [(i[0] - 1, i[1] + 1)], (i[0] - 2, i[1] + 2))
+                        legal_captures += captures_king((i[0] - 2, i[1] + 2), changes_1, changes_2)
+
     elif i[1] > 5:
         if i[0] < 2:
-            pass
+            if class2.board[(i[0] + 1, i[1] - 1)] == 1:
+                if self.board[(i[0] + 2, i[1] - 2)] == 0 and class2.board[(i[0] + 2, i[1] - 2)] == 0:
+                    legal_captures += [((i[0] + 1, i[1] - 1), (i[0] + 2, i[1] - 2))]
+                    changes_1, changes_2 = capture(self, class2, i, [(i[0] + 1, i[1] - 1)], (i[0] + 2, i[1] - 2))
+                    legal_captures += captures_king((i[0] + 2, i[1] - 2), changes_1, changes_2)
         elif i[0] > 5:
-            pass
+            if class2.board[(i[0] - 1, i[1] - 1)] == 1:
+                if self.board[(i[0] - 2, i[1] - 2)] == 0 and class2.board[(i[0] - 2, i[1] - 2)] == 0:
+                    legal_captures += [((i[0] - 1, i[1] - 1), (i[0] - 2, i[1] - 2))]
+                    changes_1, changes_2 = capture(self, class2, i, [(i[0] - 1, i[1] - 1)], (i[0] - 2, i[1] - 2))
+                    legal_captures += captures_king((i[0] - 2, i[1] - 2), changes_1, changes_2)
         else:
-            pass
+            if class2.board[(i[0] + 1, i[1] - 1)] == 1:
+                if self.board[(i[0] + 2, i[1] - 2)] == 0 and class2.board[(i[0] + 2, i[1] - 2)] == 0:
+                    legal_captures += [((i[0] + 1, i[1] - 1), (i[0] + 2, i[1] - 2))]
+                    changes_1, changes_2 = capture(self, class2, i, [(i[0] + 1, i[1] - 1)], (i[0] + 2, i[1] - 2))
+                    legal_captures += captures_king((i[0] + 2, i[1] - 2), changes_1, changes_2)
+
+            if class2.board[(i[0] - 1, i[1] - 1)] == 1:
+                if self.board[(i[0] - 2, i[1] - 2)] == 0 and class2.board[(i[0] - 2, i[1] - 2)] == 0:
+                    legal_captures += [((i[0] - 1, i[1] - 1), (i[0] - 2, i[1] - 2))]
+                    changes_1, changes_2 = capture(self, class2, i, [(i[0] - 1, i[1] - 1)], (i[0] - 2, i[1] - 2))
+                    legal_captures += captures_king((i[0] - 2, i[1] - 2), changes_1, changes_2)
+
     else:
-        pass
+        if class2.board[(i[0] + 1, i[1] + 1)] == 1:
+            if self.board[(i[0] + 2, i[1] + 2)] == 0 and class2.board[(i[0] + 2, i[1] + 2)] == 0:
+                legal_captures += [((i[0] + 1, i[1] + 1), (i[1] + 2, i[1] + 2))]
+                changes_1, changes_2 = capture(self, class2, i, [(i[0] + 1, i[1] + 1)], (i[0] + 2, i[1] + 2))
+                legal_captures += captures_king((i[0] + 2, i[1] + 2), changes_1, changes_2)
+
+        if class2.board[(i[0] - 1, i[1] + 1)] == 1:
+            if self.board[(i[0] - 2, i[1] + 2)] == 0 and class2.board[(i[0] - 2, i[2] + 2)] == 0:
+                legal_captures += [((i[0] - 1, i[1] + 1), (i[0] - 2, i[2] + 2))]
+                changes_1, changes_2 = capture(self, class2, i, [(i[0] - 1, i[1] + 1)], (i[0] - 2, i[1] + 2))
+                legal_captures += captures_king((i[0] - 2, i[1] + 2), changes_1, changes_2)
+
+        if class2.board[(i[0] + 1, i[1] - 1)] == 1:
+            if self.board[(i[0] + 2, i[1] - 2)] == 0 and class2.board[(i[0] + 2, i[1] - 2)] == 0:
+                legal_captures += [((i[0] + 1, i[1] - 1), (i[0] + 2, i[1] - 2))]
+                changes_1, changes_2 = capture(self, class2, i, [(i[0] + 1, i[1] - 1)], (i[0] + 2, i[1] - 2))
+                legal_captures += captures_king((i[0] + 2, i[1] - 2), changes_1, changes_2)
+
+        if class2.board[(i[0] - 1, i[1] - 1)] == 1:
+            if self.board[(i[0] - 2, i[1] - 2)] == 0 and class2.board[(i[0] - 2, i[1] - 2)] == 0:
+                legal_captures += [((i[0] - 1, i[1] - 1), (i[0] - 2, i[1] - 2))]
+                changes_1, changes_2 = capture(self, class2, i, [(i[0] - 1, i[1] - 1)], (i[0] - 2, i[1] - 2))
+                legal_captures += captures_king((i[0] - 2, i[1] - 2), changes_1, changes_2)
+
+    return legal_captures
 
 
 class Checkers:
@@ -258,7 +324,6 @@ class Checkers:
     def legal_moves(self, class2):
         legal_moves = {}
 
-
         for i in [k for k in self.board if self.board[k] != 0 and self.board[k] != -1]:
             legal_moves[i] = check_moves(i, self, class2, self.first)
 
@@ -269,6 +334,8 @@ class Checkers:
 
     def captures(self, class2):
         legal_captures = {}
+
+        changed = False
 
         for i in [k for k in self.board if self.board[k] == 1]:
             legal_captures[i] = check_captures(i, self, class2)
@@ -442,10 +509,13 @@ while running:
                         if pygame.mouse.get_pressed()[0]:
                             for k in previous_moves:
                                 if black_rects[int((k[0] - k[0] % 2) / 2 + 4 * k[1])].scale_by(0.7).collidepoint(mouse_pos):
-                                    whiteCheckers = move(whiteCheckers, previous_chosen, k)
-                                    pygame.draw.rect(screen, brown, black_rects[int((previous_chosen[0] - previous_chosen[0] % 2) / 2 + 4 * previous_chosen[1])])
-                                    draw_pieces(whiteCheckers.board, blackCheckers.board)
-                                    turn_end = True
+                                    if capture:
+                                        whiteCheckers = capture(whiteCheckers, blackCheckers, )
+                                    else:
+                                        whiteCheckers = move(whiteCheckers, previous_chosen, k)
+                                        pygame.draw.rect(screen, brown, black_rects[int((previous_chosen[0] - previous_chosen[0] % 2) / 2 + 4 * previous_chosen[1])])
+                                        draw_pieces(whiteCheckers.board, blackCheckers.board)
+                                        turn_end = True
                                 else:
                                     pass
                             if being_moved:
@@ -454,18 +524,20 @@ while running:
                                     previous_moves = j[-1:]
                                 if len(previous_moves) == 0:
                                     previous_moves = whiteCheckers.legal_moves(blackCheckers).copy()[being_moved]
-                                print("Previous moves:", previous_moves)
+                                else:
+                                    capture_possible = True
                             else:
                                 pass
                             previous_chosen = being_moved
-                            print("Previous chosen:", previous_chosen)
                             if turn_end:
                                 print("Turn end")
+                                captured, capture_possible = False, False
                                 capture = []
                                 previous_moves = []
                                 previous_chosen = -1
                                 turn = (turn + 1) % 2
                                 turn_end = False
+                                promote()
                                 draw_board()
                     else:
                         if pygame.mouse.get_pressed()[0]:
@@ -478,16 +550,25 @@ while running:
                                 else:
                                     pass
                             if being_moved:
-                                previous_moves = blackCheckers.legal_moves(whiteCheckers).copy()[being_moved]
+                                for j in whiteCheckers.captures(blackCheckers).copy()[being_moved]:
+                                    capture = j[0:len(j) - 1]
+                                    previous_moves = j[-1:]
+                                if len(previous_moves) == 0:
+                                    previous_moves = whiteCheckers.legal_moves(blackCheckers).copy()[being_moved]
+                                else:
+                                    capture_possible = True
                             else:
                                 pass
                             previous_chosen = being_moved
                             if turn_end:
                                 print("Turn end")
+                                capture = []
+                                captured, capture_possible = False, False
                                 previous_moves = []
                                 previous_chosen = -1
                                 turn = (turn + 1) % 2
                                 turn_end = False
+                                promote()
                                 draw_board()
 
                 else:
