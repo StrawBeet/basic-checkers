@@ -13,8 +13,6 @@ turn = 0
 turn_end = False
 game_end = False
 
-capture_possible = False
-captured = False
 previous_chosen = -1
 being_moved = 0
 capture = []
@@ -24,7 +22,7 @@ mouse_pos = pygame.mouse.get_pos()
 brown = (54, 35, 18)
 beige = (247, 232, 208)
 dark_green = (25, 120, 12)
-shaded = (0, 0, 0, 125)
+shaded = (0, 0, 0, 50)
 
 font = pygame.font.Font(None, 50)
 title_font = pygame.font.Font(None, 100)
@@ -39,6 +37,11 @@ bot_rect = bot_surf.get_rect(center = (screen.get_rect().centerx, 576))
 bot_text = font.render("Play Against a Bot", True, 'White')
 bot_text_rect = bot_text.get_rect(center = bot_rect.center)
 bot_surf.fill('black')
+
+return_surf = pygame.Surface((135, 108))
+return_rect = return_surf.get_rect(center = (screen.get_rect().centerx, screen.get_rect().centery + 330))
+return_text = font.render("Return to Menu", True, 'White')
+return_text_rect = return_text.get_rect(center = return_rect.center)
 
 end_surf = pygame.Surface((540, 432))
 end_rect = end_surf.get_rect(center = screen.get_rect().center)
@@ -74,37 +77,37 @@ def check_moves(i, class1, class2, first):
     # Returns all the legal moves for whichever piece is at i without including captures
     legal_moves = []
 
-    if first:
-        if i[0] - 1 < 0:
-            if class1.board[(i[0] + 1, i[1] + 1)] != 1 and class2.board[(i[0] + 1, i[1] + 1)] != 1:
+    if first and i[1] != 7:
+        if i[0] == 0:
+            if class1.board[(i[0] + 1, i[1] + 1)] <= 0 and class2.board[(i[0] + 1, i[1] + 1)] <= 0:
                 legal_moves += [(i[0] + 1, i[1] + 1)]
             else:
                 pass
-        elif i[0] + 1 > 7:
-            if class1.board[(i[0] - 1, i[1] + 1)] != 1 and class2.board[(i[0] - 1, i[1] + 1)] != 1:
+        elif i[0] == 7:
+            if class1.board[(i[0] - 1, i[1] + 1)] <= 0 and class2.board[(i[0] - 1, i[1] + 1)] <= 0:
                 legal_moves += [(i[0] - 1, i[1] + 1)]
         else:
-            if class1.board[(i[0] - 1, i[1] + 1)] != 1 and class2.board[(i[0] - 1, i[1] + 1)] != 1:
+            if class1.board[(i[0] - 1, i[1] + 1)] <= 0 and class2.board[(i[0] - 1, i[1] + 1)] <= 0:
                 legal_moves += [(i[0] - 1, i[1] + 1)]
 
-            if class1.board[(i[0] + 1, i[1] + 1)] != 1 and class2.board[(i[0] + 1, i[1] + 1)] != 1:
+            if class1.board[(i[0] + 1, i[1] + 1)] <= 0 and class2.board[(i[0] + 1, i[1] + 1)] <= 0:
                 legal_moves += [(i[0] + 1, i[1] + 1)]
-    else:
-        if i[0] - 1 < 0:
-            if class1.board[(i[0] + 1, i[1] - 1)] != 1 and class2.board[(i[0] + 1, i[1] - 1)] != 1:
+    elif not first and i[1] != 0:
+        if i[0] == 0:
+            if class1.board[(i[0] + 1, i[1] - 1)] <= 0 and class2.board[(i[0] + 1, i[1] - 1)] <= 0:
                 legal_moves += [(i[0] + 1, i[1] - 1)]
             else:
                 pass
-        elif i[0] + 1 > 7:
-            if class1.board[(i[0] - 1, i[1] - 1)] != 1 and class2.board[(i[0] - 1, i[1] - 1)] != 1:
+        elif i[0] == 7:
+            if class1.board[(i[0] - 1, i[1] - 1)] <= 0 and class2.board[(i[0] - 1, i[1] - 1)] <= 0:
                 legal_moves += [(i[0] - 1, i[1] - 1)]
             else:
                 pass
         else:
-            if class1.board[(i[0] - 1, i[1] - 1)] != 1 and class2.board[(i[0] - 1, i[1] - 1)] != 1:
+            if class1.board[(i[0] - 1, i[1] - 1)] <= 0 and class2.board[(i[0] - 1, i[1] - 1)] <= 0:
                 legal_moves += [(i[0] - 1, i[1] - 1)]
 
-            if class1.board[(i[0] + 1, i[1] - 1)] != 1 and class2.board[(i[0] + 1, i[1] - 1)] != 1:
+            if class1.board[(i[0] + 1, i[1] - 1)] <= 0 and class2.board[(i[0] + 1, i[1] - 1)] <= 0:
                 legal_moves += [(i[0] + 1, i[1] - 1)]
 
 
@@ -175,28 +178,28 @@ def moves_king(i, self, class2):
 
     if i[1] == 7:
         if i[0] == 0:
-            if self.board[(1, i[1] - 1)] == 0 and class2.board[(1, i[1] - 1)] == 0:
-                legal_moves += [(1, i[1] - 1)]
+            if self.board[(1, 6)] == 0 and class2.board[(1, 6)] == 0:
+                legal_moves += [(1, 6)]
         elif i[0] == 7:
-            if self.board[(6, i[1] - 1)] == 0 and class2.board[(6, i[1] - 1)] == 0:
-                legal_moves += [(6, i[1] - 1)]
+            if self.board[(6, 6)] == 0 and class2.board[(6, 6)] == 0:
+                legal_moves += [(6, 6)]
         else:
             if self.board[(i[0] + 1, i[1] - 1)] == 0 and class2.board[(1, i[1] - 1)] == 0:
-                legal_moves += [(1, i[1] - 1)]
+                legal_moves += [(i[0] + 1, i[1] - 1)]
             if self.board[(i[0] - 1, i[1] - 1)] == 0 and class2.board[(6, i[1] - 1)] == 0:
-                legal_moves += [(6, i[1] - 1)]
+                legal_moves += [(i[0] - 1, i[1] - 1)]
     elif i[1] == 0:
         if i[0] == 0:
-            if self.board[(1, i[1] + 1)] == 0 and class2.board[(1, i[1] + 1)] == 0:
-                legal_moves += [(1, i[1] + 1)]
+            if self.board[(1, 1)] == 0 and class2.board[(1, 1)] == 0:
+                legal_moves += [(1, 1)]
         elif i[0] == 7:
-            if self.board[(6, i[1] + 1)] == 0 and class2.board[(6, i[1] + 1)] == 0:
-                legal_moves += [(6, i[1] + 1)]
+            if self.board[(6, 1)] == 0 and class2.board[(6, )] == 0:
+                legal_moves += [(6, 1)]
         else:
-            if self.board[(i[0] + 1, i[1] + 1)] == 0 and class2.board[(1, i[1] + 1)] == 0:
-                legal_moves += [(1, i[1] + 1)]
-            if self.board[(i[0] - 1, i[1] + 1)] == 0 and class2.board[(6, i[1] + 1)] == 0:
-                legal_moves += [(6, i[1] + 1)]
+            if self.board[(i[0] + 1, 1)] == 0 and class2.board[(1, 1)] == 0:
+                legal_moves += [(i[0] + 1, 1)]
+            if self.board[(i[0] - 1, 1)] == 0 and class2.board[(6, 1)] == 0:
+                legal_moves += [(i[0] - 1, 1)]
     else:
         if i[0] == 0:
             if self.board[(1, i[1] - 1)] == 0 and class2.board[(1, i[1] - 1)] == 0:
@@ -210,13 +213,13 @@ def moves_king(i, self, class2):
                 legal_moves += [(6, i[1] + 1)]
         else:
             if self.board[(i[0] + 1, i[1] - 1)] == 0 and class2.board[(1, i[1] - 1)] == 0:
-                legal_moves += [(1, i[1] - 1)]
+                legal_moves += [(i[0] + 1, i[1] - 1)]
             if self.board[(i[0] - 1, i[1] - 1)] == 0 and class2.board[(6, i[1] - 1)] == 0:
-                legal_moves += [(6, i[1] - 1)]
+                legal_moves += [(i[0] - 1, i[1] - 1)]
             if self.board[(i[0] + 1, i[1] + 1)] == 0 and class2.board[(1, i[1] + 1)] == 0:
-                legal_moves += [(1, i[1] + 1)]
+                legal_moves += [(i[0] + 1, i[1] + 1)]
             if self.board[(i[0] - 1, i[1] + 1)] == 0 and class2.board[(6, i[1] + 1)] == 0:
-                legal_moves += [(6, i[1] + 1)]
+                legal_moves += [(i[0] - 1, i[1] + 1)]
 
     return legal_moves
 
@@ -530,6 +533,10 @@ while running:
                 if not bot:
                     if turn % 2 == 0:
                         if pygame.mouse.get_pressed()[0]:
+                            print("White moves:", whiteCheckers.legal_moves(blackCheckers))
+                            print("White captures:", whiteCheckers.captures(blackCheckers))
+                            print("Black moves:", blackCheckers.legal_moves(blackCheckers))
+                            print("Black captures:", blackCheckers.captures(blackCheckers))
                             for k in previous_moves:
                                 if black_rects[int((k[0] - k[0] % 2) / 2 + 4 * k[1])].scale_by(0.7).collidepoint(mouse_pos):
                                     if capture:
@@ -559,7 +566,6 @@ while running:
                             previous_chosen = being_moved
                             if turn_end:
                                 print("Turn end")
-                                captured, capture_possible = False, False
                                 capture = []
                                 previous_moves = []
                                 previous_chosen = -1
@@ -587,6 +593,8 @@ while running:
                                 for j in blackCheckers.captures(whiteCheckers).copy()[being_moved]:
                                     capture = j[0:len(j) - 1][0]
                                     previous_moves = j[-1:]
+                                if capture == []:
+                                    previous_moves = []
                                 if len(previous_moves) == 0:
                                     previous_moves = blackCheckers.legal_moves(whiteCheckers).copy()[being_moved]
                                 else:
@@ -597,7 +605,6 @@ while running:
                             if turn_end:
                                 print("Turn end")
                                 capture = []
-                                captured, capture_possible = False, False
                                 previous_moves = []
                                 previous_chosen = -1
                                 turn = (turn + 1) % 2
@@ -612,7 +619,7 @@ while running:
                 game_end = True
                 end_text = font.render("Black wins!", True, 'White')
                 end_text_rect = end_text.get_rect(center = screen.get_rect().center)
-            elif len([k for k in blackCheckers.board if blackCheckers.board[k] > 0]):
+            elif len([k for k in blackCheckers.board if blackCheckers.board[k] > 0]) == 0:
                 game_active = False
                 game_end = True
                 end_text = font.render("White wins!", True, 'White')
@@ -631,7 +638,29 @@ while running:
                 end_text_rect = end_text.get_rect(center = screen.get_rect().center)
 
             if game_end:
+                whiteCheckers.board = white_board
+                blackCheckers.board = black_board
+                capture = []
+                previous_moves = []
+                previous_chosen = -1
+                turn = 0
+                turn_end = False
+                being_moved = 0
                 screen.fill(shaded)
+                screen.blit(end_surf, end_rect)
+                screen.blit(end_text, end_text_rect)
+                screen.blit(return_surf, return_rect)
+                screen.blit(return_text, return_text_rect)
+        elif game_end:
+            for event in pygame.event.get():
+                if event.buttons == 1:
+                    if pygame.mouse.get_pressed()[0]:
+                        if return_rect.collidepoint(mouse_pos):
+                            game_end = False
+                            menu = True
+                            bot = False
+                            screen.fill(dark_green)
+
 
         else:
             print("Unexpected game state")
