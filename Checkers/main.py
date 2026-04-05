@@ -79,13 +79,13 @@ def check_moves(i, class1, class2, first):
 
     if first and i[1] != 7:
         if i[0] == 0:
-            if class1.board[(i[0] + 1, i[1] + 1)] <= 0 and class2.board[(i[0] + 1, i[1] + 1)] <= 0:
-                legal_moves += [(i[0] + 1, i[1] + 1)]
+            if class1.board[(1, i[1] + 1)] <= 0 and class2.board[(1, i[1] + 1)] <= 0:
+                legal_moves += [(1, i[1] + 1)]
             else:
                 pass
         elif i[0] == 7:
-            if class1.board[(i[0] - 1, i[1] + 1)] <= 0 and class2.board[(i[0] - 1, i[1] + 1)] <= 0:
-                legal_moves += [(i[0] - 1, i[1] + 1)]
+            if class1.board[(6, i[1] + 1)] <= 0 and class2.board[(6, i[1] + 1)] <= 0:
+                legal_moves += [(6, i[1] + 1)]
         else:
             if class1.board[(i[0] - 1, i[1] + 1)] <= 0 and class2.board[(i[0] - 1, i[1] + 1)] <= 0:
                 legal_moves += [(i[0] - 1, i[1] + 1)]
@@ -94,13 +94,13 @@ def check_moves(i, class1, class2, first):
                 legal_moves += [(i[0] + 1, i[1] + 1)]
     elif not first and i[1] != 0:
         if i[0] == 0:
-            if class1.board[(i[0] + 1, i[1] - 1)] <= 0 and class2.board[(i[0] + 1, i[1] - 1)] <= 0:
-                legal_moves += [(i[0] + 1, i[1] - 1)]
+            if class1.board[(1, i[1] - 1)] <= 0 and class2.board[(1, i[1] - 1)] <= 0:
+                legal_moves += [(1, i[1] - 1)]
             else:
                 pass
         elif i[0] == 7:
-            if class1.board[(i[0] - 1, i[1] - 1)] <= 0 and class2.board[(i[0] - 1, i[1] - 1)] <= 0:
-                legal_moves += [(i[0] - 1, i[1] - 1)]
+            if class1.board[(6, i[1] - 1)] <= 0 and class2.board[(6, i[1] - 1)] <= 0:
+                legal_moves += [(6, i[1] - 1)]
             else:
                 pass
         else:
@@ -184,21 +184,21 @@ def moves_king(i, self, class2):
             if self.board[(6, 6)] == 0 and class2.board[(6, 6)] == 0:
                 legal_moves += [(6, 6)]
         else:
-            if self.board[(i[0] + 1, i[1] - 1)] == 0 and class2.board[(1, i[1] - 1)] == 0:
-                legal_moves += [(i[0] + 1, i[1] - 1)]
-            if self.board[(i[0] - 1, i[1] - 1)] == 0 and class2.board[(6, i[1] - 1)] == 0:
-                legal_moves += [(i[0] - 1, i[1] - 1)]
+            if self.board[(i[0] + 1, 6)] == 0 and class2.board[(i[0] + 1, 6)] == 0:
+                legal_moves += [(i[0] + 1, 6)]
+            if self.board[(i[0] - 1, i[1] - 1)] == 0 and class2.board[(i[0] - 1, 6)] == 0:
+                legal_moves += [(i[0] - 1, 6)]
     elif i[1] == 0:
         if i[0] == 0:
             if self.board[(1, 1)] == 0 and class2.board[(1, 1)] == 0:
                 legal_moves += [(1, 1)]
         elif i[0] == 7:
-            if self.board[(6, 1)] == 0 and class2.board[(6, )] == 0:
+            if self.board[(6, 1)] == 0 and class2.board[(6, 1)] == 0:
                 legal_moves += [(6, 1)]
         else:
-            if self.board[(i[0] + 1, 1)] == 0 and class2.board[(1, 1)] == 0:
+            if self.board[(i[0] + 1, 1)] == 0 and class2.board[(i[0] + 1, 1)] == 0:
                 legal_moves += [(i[0] + 1, 1)]
-            if self.board[(i[0] - 1, 1)] == 0 and class2.board[(6, 1)] == 0:
+            if self.board[(i[0] - 1, 1)] == 0 and class2.board[(i[0] - 1, 1)] == 0:
                 legal_moves += [(i[0] - 1, 1)]
     else:
         if i[0] == 0:
@@ -212,13 +212,13 @@ def moves_king(i, self, class2):
             if self.board[(6, i[1] + 1)] == 0 and class2.board[(6, i[1] + 1)] == 0:
                 legal_moves += [(6, i[1] + 1)]
         else:
-            if self.board[(i[0] + 1, i[1] - 1)] == 0 and class2.board[(1, i[1] - 1)] == 0:
+            if self.board[(i[0] + 1, i[1] - 1)] == 0 and class2.board[(i[0] + 1, i[1] - 1)] == 0:
                 legal_moves += [(i[0] + 1, i[1] - 1)]
-            if self.board[(i[0] - 1, i[1] - 1)] == 0 and class2.board[(6, i[1] - 1)] == 0:
+            if self.board[(i[0] - 1, i[1] - 1)] == 0 and class2.board[(i[0] - 1, i[1] - 1)] == 0:
                 legal_moves += [(i[0] - 1, i[1] - 1)]
-            if self.board[(i[0] + 1, i[1] + 1)] == 0 and class2.board[(1, i[1] + 1)] == 0:
+            if self.board[(i[0] + 1, i[1] + 1)] == 0 and class2.board[(i[0] + 1, i[1] + 1)] == 0:
                 legal_moves += [(i[0] + 1, i[1] + 1)]
-            if self.board[(i[0] - 1, i[1] + 1)] == 0 and class2.board[(6, i[1] + 1)] == 0:
+            if self.board[(i[0] - 1, i[1] + 1)] == 0 and class2.board[(i[0] - 1, i[1] + 1)] == 0:
                 legal_moves += [(i[0] - 1, i[1] + 1)]
 
     return legal_moves
@@ -319,7 +319,7 @@ for i in range(8):
                 white_board[(i,k)] = 1
             else:
                 white_board[(i,k)] = 0
-whiteCheckers = Checkers(white_board, True)
+whiteCheckers = Checkers(white_board.copy(), True)
 
 black_board = {}
 for i in range(8):
@@ -333,7 +333,7 @@ for i in range(8):
                 black_board[(i,k)] = 1
             else:
                 black_board[(i,k)] = 0
-blackCheckers = Checkers(black_board, False)
+blackCheckers = Checkers(black_board.copy(), False)
 
 def promote():
     for i in whiteCheckers.board:
@@ -366,7 +366,6 @@ def draw_pieces(white, black):
 
 def draw_moves(white, black, square):
     moves = white.captures(black)[square]
-    print("Moves:", moves)
     # The code below draws the possible moves if you clicked on a piece
     if white.board[square] == 1:
         if len([k for k in white.captures(black) if white.captures(black)[k] != []]) == 0:
@@ -460,6 +459,26 @@ def captures(color1, color2, moved, captured, move_to):
 
     return color1, color2
 
+def value(color1, color2):
+    value1 = 0
+    value2 = 0
+    for i in [i for i in color1.board if color1.board[i] > 0]:
+        value1 += color1.board[i]
+
+    for i in [i for i in color2.board if color2.board[i] > 0]:
+        value2 += color2.board[i]
+
+    return value1 - value2
+
+def best_move(color1, color2):
+    current_value = value(color1, color2)
+    best = None
+    moves = [i for i in color1.captures(color2) if len(color1.captures(color2)[i]) > 0]
+    if len(moves) == 0:
+        moves = [i for i in color1.legal_moves(color2) if len(color1.legal_moves(color2)) > 0]
+        for i in moves:
+            pass
+
 
 
 screen.fill(dark_green) # So that the screen isn't filled too many times every second
@@ -533,10 +552,6 @@ while running:
                 if not bot:
                     if turn % 2 == 0:
                         if pygame.mouse.get_pressed()[0]:
-                            print("White moves:", whiteCheckers.legal_moves(blackCheckers))
-                            print("White captures:", whiteCheckers.captures(blackCheckers))
-                            print("Black moves:", blackCheckers.legal_moves(blackCheckers))
-                            print("Black captures:", blackCheckers.captures(blackCheckers))
                             for k in previous_moves:
                                 if black_rects[int((k[0] - k[0] % 2) / 2 + 4 * k[1])].scale_by(0.7).collidepoint(mouse_pos):
                                     if capture:
@@ -627,7 +642,7 @@ while running:
             elif (len([k for k in whiteCheckers.legal_moves(blackCheckers) if
                        whiteCheckers.legal_moves(blackCheckers)[k] != []]) == 0 and len(
                 [k for k in whiteCheckers.captures(blackCheckers) if
-                 whiteCheckers.captures(blackCheckers[k] != 0)]) == 0 and turn == 0) or (len(
+                 whiteCheckers.captures(blackCheckers)[k] != []]) == 0 and turn == 0) or (len(
                 [k for k in blackCheckers.legal_moves(whiteCheckers) if
                  blackCheckers.legal_moves(whiteCheckers)[k] != []]) == 0 and len(
                 [k for k in blackCheckers.captures(whiteCheckers) if
@@ -638,6 +653,7 @@ while running:
                 end_text_rect = end_text.get_rect(center = screen.get_rect().center)
 
             if game_end:
+                print("Game ended")
                 whiteCheckers.board = white_board
                 blackCheckers.board = black_board
                 capture = []
@@ -652,14 +668,12 @@ while running:
                 screen.blit(return_surf, return_rect)
                 screen.blit(return_text, return_text_rect)
         elif game_end:
-            for event in pygame.event.get():
-                if event.buttons == 1:
-                    if pygame.mouse.get_pressed()[0]:
-                        if return_rect.collidepoint(mouse_pos):
-                            game_end = False
-                            menu = True
-                            bot = False
-                            screen.fill(dark_green)
+            #if return_rect.collidepoint(mouse_pos):
+             #   game_end = False
+              #  menu = True
+               # bot = False
+                #screen.fill(dark_green)
+            pass
 
 
         else:
