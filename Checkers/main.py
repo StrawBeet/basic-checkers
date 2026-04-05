@@ -11,7 +11,7 @@ bot = False
 settings = False
 turn = 0
 turn_end = False
-
+game_end = False
 
 capture_possible = False
 captured = False
@@ -24,22 +24,27 @@ mouse_pos = pygame.mouse.get_pos()
 brown = (54, 35, 18)
 beige = (247, 232, 208)
 dark_green = (25, 120, 12)
+shaded = (0, 0, 0, 125)
 
 font = pygame.font.Font(None, 50)
 title_font = pygame.font.Font(None, 100)
 
 local_mult_surf = pygame.Surface((360, 216))
 local_mult_rect = local_mult_surf.get_rect(center = (screen.get_rect().centerx, 282))
-local_mult_text = font.render("Play Against a Friend", True, 'white')
+local_mult_text = font.render("Play Against a Friend", True, 'White')
 local_mult_text_rect = local_mult_text.get_rect(center = local_mult_rect.center)
 
 bot_surf = pygame.Surface((360, 216))
 bot_rect = bot_surf.get_rect(center = (screen.get_rect().centerx, 576))
-bot_text = font.render("Play Against a Bot", True, 'white')
+bot_text = font.render("Play Against a Bot", True, 'White')
 bot_text_rect = bot_text.get_rect(center = bot_rect.center)
 bot_surf.fill('black')
 
-title_text = title_font.render("Checkers", True, 'black')
+end_surf = pygame.Surface((540, 432))
+end_rect = end_surf.get_rect(center = screen.get_rect().center)
+end_text = None
+
+title_text = title_font.render("Checkers", True, 'Black')
 title_rect = title_text.get_rect(center = (screen.get_rect().centerx, 100))
 
 white_rects = []
@@ -132,7 +137,7 @@ def check_captures(i, self, class2):
 def check_capture1(i, self, class2):
     # This checks whether the piece can take to the top left
     if i[1] < 6:
-        if class2.board[(i[0] - 1, i[1] + 1)] == 1:
+        if class2.board[(i[0] - 1, i[1] + 1)] == 1 or class2.board[(i[0] - 1, i[1] + 1)] == 3:
             if self.board[(i[0] - 2, i[1] + 2)] == 0 and class2.board[(i[0] - 2, i[1] + 2)] == 0:
                 return [[(i[0] - 1, i[1] + 1), (i[0] - 2, i[1] + 2)]]
 
@@ -141,7 +146,7 @@ def check_capture1(i, self, class2):
 def check_capture2(i, self, class2):
     # This checks whether the piece can take to the top right
     if i[1] < 6:
-        if class2.board[(i[0] + 1, i[1] + 1)] == 1:
+        if class2.board[(i[0] + 1, i[1] + 1)] == 1 or class2.board[(i[0] + 1, i[1] + 1)] == 3:
             if self.board[(i[0] + 2, i[1] + 2)] == 0 and class2.board[(i[0] + 2, i[1] + 2)] == 0:
                 return [[(i[0] + 1, i[1] + 1), (i[0] + 2, i[1] + 2)]]
 
@@ -150,7 +155,7 @@ def check_capture2(i, self, class2):
 def check_capture3(i, self, class2):
     # This checks whether the piece can take to the bottom left
     if i[1] > 1:
-        if class2.board[(i[0] - 1, i[1] - 1)] == 1:
+        if class2.board[(i[0] - 1, i[1] - 1)] == 1 or class2.board[(i[0] - 1, i[1] - 1)] == 3:
             if self.board[(i[0] - 2, i[1] - 2)] == 0 and class2.board[(i[0] - 2, i[1] - 2)] == 0:
                 return [[(i[0] - 1, i[1] - 1), (i[0] - 2, i[1] - 2)]]
 
@@ -159,7 +164,7 @@ def check_capture3(i, self, class2):
 def check_capture4(i, self, class2):
     # This checks whether the piece can take to the bottom right
     if i[1] > 1:
-        if class2.board[(i[0] + 1, i[1] - 1)] == 1:
+        if class2.board[(i[0] + 1, i[1] - 1)] == 1 or class2.board[(i[0] + 1, i[1] - 1)] == 3:
             if self.board[(i[0] + 2, i[1] - 2)] == 0 and class2.board[(i[0] + 2, i[1] - 2)] == 0:
                 return [[(i[0] + 1, i[1] - 1), (i[0] + 2, i[1] - 2)]]
 
@@ -219,91 +224,48 @@ def captures_king(i, self, class2):
     legal_captures = []
 
     if i[1] < 2:
-
         if i[0] < 2:
+            legal_captures += check_capture2(i, self, class2)
 
-            if class2.board[(i[0] + 1, i[1] + 1)] == 1:
-                if self.board[(i[0] + 2, i[1] + 2)] == 0 and class2.board[(i[0] + 2, i[1] + 2)] == 0:
-                    legal_captures += [[(i[0] + 1, i[1] + 1), (i[0] + 2, i[1] + 2)]]
         elif i[0] > 5:
+            legal_captures += check_capture1(i, self, class2)
 
-            if class2.board[(i[0] - 1, i[1] + 1)] == 1:
-                if self.board[(i[0] - 2, i[1] + 2)] == 0 and class2.board[(i[0] - 2, i[2] + 2)] == 0:
-                    legal_captures += [[(i[0] - 1, i[1] + 1), (i[0] - 2, i[1] + 2)]]
         else:
+            legal_captures += check_capture1(i, self, class2)
 
-
-            if class2.board[(i[0] + 1, i[1] + 1)] == 1:
-                if self.board[(i[0] + 2, i[1] + 2)] == 0 and class2.board[(i[0] + 2, i[1] + 2)] == 0:
-                    legal_captures += [[(i[0] + 1, i[1] + 1), (i[1] + 2, i[1] + 2)]]
-
-            if class2.board[(i[0] - 1, i[1] + 1)] == 1:
-                if self.board[(i[0] - 2, i[1] + 2)] == 0 and class2.board[(i[0] - 2, i[2] + 2)] == 0:
-                    legal_captures += [[(i[0] - 1, i[1] + 1), (i[0] - 2, i[1] + 2)]]
+            legal_captures += check_capture2(i, self, class2)
 
     elif i[1] > 5:
-
         if i[0] < 2:
-
-            if class2.board[(i[0] + 1, i[1] - 1)] == 1:
-                if self.board[(i[0] + 2, i[1] - 2)] == 0 and class2.board[(i[0] + 2, i[1] - 2)] == 0:
-                    legal_captures += [[(i[0] + 1, i[1] - 1), (i[0] + 2, i[1] - 2)]]
+            legal_captures += check_capture4(i, self, class2)
 
         elif i[0] > 5:
-
-            if class2.board[(i[0] - 1, i[1] - 1)] == 1:
-                if self.board[(i[0] - 2, i[1] - 2)] == 0 and class2.board[(i[0] - 2, i[1] - 2)] == 0:
-                    legal_captures += [[(i[0] - 1, i[1] - 1), (i[0] - 2, i[1] - 2)]]
+            legal_captures += check_capture3(i, self, class2)
 
         else:
+            legal_captures += check_capture3(i, self, class2)
 
-            if class2.board[(i[0] + 1, i[1] - 1)] == 1:
-                if self.board[(i[0] + 2, i[1] - 2)] == 0 and class2.board[(i[0] + 2, i[1] - 2)] == 0:
-                    legal_captures += [[(i[0] + 1, i[1] - 1), (i[0] + 2, i[1] - 2)]]
-
-            if class2.board[(i[0] - 1, i[1] - 1)] == 1:
-                if self.board[(i[0] - 2, i[1] - 2)] == 0 and class2.board[(i[0] - 2, i[1] - 2)] == 0:
-                    legal_captures += [[(i[0] - 1, i[1] - 1), (i[0] - 2, i[1] - 2)]]
+            legal_captures += check_capture4(i, self, class2)
 
     else:
-
         if i[0] < 2:
+            legal_captures += check_capture2(i, self, class2)
 
-            if class2.board[(i[0] + 1, i[1] + 1)] == 1:
-                if self.board[(i[0] + 2, i[1] + 2)] == 0 and class2.board[(i[0] + 2, i[1] + 2)] == 0:
-                    legal_captures += [(i[0] + 1, i[1] + 1), (i[1] + 2, i[1] + 2)]
-
-            if class2.board[(i[0] + 1, i[1] - 1)] == 1:
-                if self.board[(i[0] + 2, i[1] - 2)] == 0 and class2.board[(i[0] + 2, i[1] - 2)] == 0:
-                    legal_captures += [(i[0] + 1, i[1] - 1), (i[0] + 2, i[1] - 2)]
+            legal_captures += check_capture4(i, self, class2)
 
         elif i[0] > 5:
+            legal_captures += check_capture1(i, self, class2)
 
-            if class2.board[(i[0] - 1, i[1] + 1)] == 1:
-                if self.board[(i[0] - 2, i[1] + 2)] == 0 and class2.board[(i[0] - 2, i[2] + 2)] == 0:
-                    legal_captures += [(i[0] - 1, i[1] + 1), (i[0] - 2, i[2] + 2)]
-
-            if class2.board[(i[0] - 1, i[1] - 1)] == 1:
-                if self.board[(i[0] - 2, i[1] - 2)] == 0 and class2.board[(i[0] - 2, i[1] - 2)] == 0:
-                    legal_captures += [(i[0] - 1, i[1] - 1), (i[0] - 2, i[1] - 2)]
+            legal_captures += check_capture3(i, self, class2)
 
         else:
+            legal_captures += check_capture1(i, self, class2)
 
-            if class2.board[(i[0] + 1, i[1] + 1)] == 1:
-                if self.board[(i[0] + 2, i[1] + 2)] == 0 and class2.board[(i[0] + 2, i[1] + 2)] == 0:
-                    legal_captures += [(i[0] + 1, i[1] + 1), (i[1] + 2, i[1] + 2)]
+            legal_captures += check_capture2(i, self, class2)
 
-            if class2.board[(i[0] - 1, i[1] + 1)] == 1:
-                if self.board[(i[0] - 2, i[1] + 2)] == 0 and class2.board[(i[0] - 2, i[2] + 2)] == 0:
-                    legal_captures += [(i[0] - 1, i[1] + 1), (i[0] - 2, i[2] + 2)]
+            legal_captures += check_capture3(i, self, class2)
 
-            if class2.board[(i[0] + 1, i[1] - 1)] == 1:
-                if self.board[(i[0] + 2, i[1] - 2)] == 0 and class2.board[(i[0] + 2, i[1] - 2)] == 0:
-                    legal_captures += [(i[0] + 1, i[1] - 1), (i[0] + 2, i[1] - 2)]
-
-            if class2.board[(i[0] - 1, i[1] - 1)] == 1:
-                if self.board[(i[0] - 2, i[1] - 2)] == 0 and class2.board[(i[0] - 2, i[1] - 2)] == 0:
-                    legal_captures += [(i[0] - 1, i[1] - 1), (i[0] - 2, i[1] - 2)]
+            legal_captures += check_capture4(i, self, class2)
 
     return legal_captures
 
@@ -404,7 +366,6 @@ def draw_moves(white, black, square):
     print("Moves:", moves)
     # The code below draws the possible moves if you clicked on a piece
     if white.board[square] == 1:
-        print("Moves:", moves)
         if len([k for k in white.captures(black) if white.captures(black)[k] != []]) == 0:
             moves = white.legal_moves(black)[square]
             for i in moves:
@@ -419,7 +380,6 @@ def draw_moves(white, black, square):
                                                      782 - 100 * i[1][1]), 20,
                                    1)
     elif white.board[square] == 3:
-        print("Moves:", moves)
         if len([k for k in white.captures(black) if white.captures(black)[k] != []]) == 0:
             moves = white.legal_moves(black)[square]
             for i in moves:
@@ -647,6 +607,32 @@ while running:
 
                 else:
                     turn = (turn + 1) % 2
+            if len([k for k in whiteCheckers.board if whiteCheckers.board[k] > 0]) == 0:
+                game_active = False
+                game_end = True
+                end_text = font.render("Black wins!", True, 'White')
+                end_text_rect = end_text.get_rect(center = screen.get_rect().center)
+            elif len([k for k in blackCheckers.board if blackCheckers.board[k] > 0]):
+                game_active = False
+                game_end = True
+                end_text = font.render("White wins!", True, 'White')
+                end_text_rect = end_text.get_rect(center = screen.get_rect().center)
+            elif (len([k for k in whiteCheckers.legal_moves(blackCheckers) if
+                       whiteCheckers.legal_moves(blackCheckers)[k] != []]) == 0 and len(
+                [k for k in whiteCheckers.captures(blackCheckers) if
+                 whiteCheckers.captures(blackCheckers[k] != 0)]) == 0 and turn == 0) or (len(
+                [k for k in blackCheckers.legal_moves(whiteCheckers) if
+                 blackCheckers.legal_moves(whiteCheckers)[k] != []]) == 0 and len(
+                [k for k in blackCheckers.captures(whiteCheckers) if
+                 blackCheckers.captures(whiteCheckers)[k] != []]) == 0 and turn == 1):
+                game_active = False
+                game_end = True
+                end_text = font.render("Tie", True, 'White')
+                end_text_rect = end_text.get_rect(center = screen.get_rect().center)
+
+            if game_end:
+                screen.fill(shaded)
+
         else:
             print("Unexpected game state")
             running = False
