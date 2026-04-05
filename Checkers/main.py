@@ -506,7 +506,7 @@ def best_move(color1, color2):
                         pass
                     else:
                         if value(test_color1, test_color2) == value(best_color1, best_color2):
-                            best.append([k])
+                            best.append([[i, k]])
                         else:
                             pass
                 test_color1 = copy.deepcopy(start_color1)
@@ -523,11 +523,12 @@ def best_move(color1, color2):
                         for l in test_color1.captures(test_color2)[j]:
                             checking_color1, checking_color2 = captures(test_color1, test_color2, j, l[0], l[1])
                             if value(checking_color1, checking_color2) > value(best_color1, best_color2):
-                                best = [i,j]
+                                best = [[i,j, [k, l]]]
                                 best_color1 = copy.deepcopy(checking_color1)
                                 best_color2 = copy.deepcopy(checking_color2)
                             elif value(checking_color1, checking_color2) > value(best_color1, best_color2):
-                                best.append(i,j)
+                                best.append([i, j, [k, l]])
+
                             else:
                                 pass
                 else:
@@ -537,24 +538,30 @@ def best_move(color1, color2):
                             for l in test_color2.captures(test_color1)[j]:
                                 checking_color1, checking_color2 = captures(test_color1, test_color2, j, l[0], l[1])
                                 if value(checking_color1, checking_color2) > value(checking_color1, checking_color2):
-                                    best = [[i]]
+                                    best = [[i, [k]]]
                                 elif value(checking_color1, checking_color2) == value(best_color1, best_color2):
-                                    best.append([i])
+                                    best.append([i, [k]])
                                 else:
                                     pass
                     else:
                         if value(test_color1, test_color2) > value(best_color1, best_color2):
-                            best = i
+                            best = [[i, [k]]]
                             best_color1 = copy.deepcopy(test_color1)
                             best_color2 = copy.deepcopy(test_color2)
                         elif value(test_color1, test_color2) == value(best_color1, best_color2):
-                            best.append(i)
+                            best.append([i, [k]])
 
     if len(best) > 0:
-        n = randint(0, len(best))
+        n = randint(0, len(best) - 1)
         return best[n]
     else:
-        return []
+        best = [i for i in best_color1.legal_moves(best_color2) if best_color1.legal_moves(best_color2)[i] != []]
+        choose = best_color1.legal_moves(best_color2)[best[randint(0, len(best) - 1)]]
+        if len(choose) == 1:
+            return [[best[best.index(choose)], choose[0]]]
+        else:
+            return [[best[best.index(choose)], choose[randint(0, len(choose) - 1)]]]
+
 
 
 screen.fill(dark_green) # So that the screen isn't filled too many times every second
@@ -747,11 +754,18 @@ while running:
                     else:
                         chosen = best_move(blackCheckers, whiteCheckers)
                         if len(chosen) > 0:
-                            if len(chosen) == 2:
-                                #blackCheckers, whiteCheckers = captures(blackCheckers, whiteCheckers, )
-                                pass
+                            if len(chosen) == 3:
+                                blackCheckers, whiteCheckers = captures(blackCheckers, whiteCheckers, chosen[0], chosen[2][0][0], chosen[2][0][1])
+                                blackCheckers, whiteCheckers = captures(blackCheckers, whiteCheckers, chosen[1], chosen[2][1][0], chosen[2][1][1])
+                            elif len(chosen) == 2:
+                                blackCheckers, whiteCheckers = captures(blackCheckers, whiteCheckers, chosen[0], chosen[1][0][0], chosen[1][0][1])
+                            else:
+                                blackCheckers = move(blackCheckers, chosen[0][0], chosen[0][1])
+
                         else:
                             pass
+                        promote()
+                        draw_board()
                         turn = (turn + 1) % 2
 
             if len([k for k in whiteCheckers.board if whiteCheckers.board[k] > 0]) == 0:
