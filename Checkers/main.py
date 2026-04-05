@@ -1,5 +1,7 @@
 import pygame
 from sys import exit
+from random import randint
+import copy
 
 pygame.init()
 screen = pygame.display.set_mode((1080, 864))
@@ -441,7 +443,7 @@ def captures(color1, color2, moved, captured, move_to):
                     capturing = False
             if event.type == pygame.MOUSEMOTION:
                 mouse_pos = pygame.mouse.get_pos()
-        if len(possibilities) == 0:
+        if len(possibilities) == 0 or not capturing:
             break
         draw_moves(color1, color2, previous)
         pygame.display.flip()
@@ -470,14 +472,55 @@ def value(color1, color2):
 
     return value1 - value2
 
+def bot_move(color, moved, move_to):
+    color.board[move_to] = color.board[moved]
+    color.board[moved] = 0
+    return color
+
+def bot_capture(color1, color2, moved, captured, move_to):
+    color1.board[move_to] = color1.board[moved]
+    color2.board[captured] = 0
+    color1.board[moved] = 0
+    return
+
 def best_move(color1, color2):
     current_value = value(color1, color2)
-    best = None
+    best = []
+    best_color1 = copy.deepcopy(color1)
+    best_color2 = copy.deepcopy(color2)
+    start_color1 = copy.deepcopy(color1)
+    start_color2 = copy.deepcopy(color2)
+    test_color1 = copy.deepcopy(color1)
+    test_color2 = copy.deepcopy(color2)
     moves = [i for i in color1.captures(color2) if len(color1.captures(color2)[i]) > 0]
+    current_moves = None
     if len(moves) == 0:
-        moves = [i for i in color1.legal_moves(color2) if len(color1.legal_moves(color2)) > 0]
-        for i in moves:
+        moves = [i for i in color1.legal_moves(color2) if len(color1.legal_moves(color2)[i]) > 0]
+        if len(moves) > 0:
+            for i in moves:
+                for k in start_color1.legal_moves(color2)[i]:
+                    test_color1 = move(start_color1, i, k)
+                    moves2 = [j for j in start_color2.captures(start_color1) if len(start_color2.legal_moves(start_color1)[j]) > 0]
+                    if len(moves2) > 0:
+                        pass
+                    else:
+                        if value(test_color1, test_color2) == value(best_color1, best_color2):
+                            best.append([k])
+                        else:
+                            pass
+                test_color1 = copy.deepcopy(start_color1)
+                test_color2 = copy.deepcopy(start_color2)
+        else:
             pass
+    else:
+        for i in moves:
+            for k in start_color1.captures(start_color2)[i]:
+                test_color1, test_color2 = captures(start_color1, start_color2, i, k[0], k[1])
+                current_moves = [j for j in test_color1.captures(test_color2) if len(test_color1.captues(test_color2)[j]) > 0]
+                if len(current_moves) > 0:
+                    pass
+                else:
+                    pass
 
 
 
