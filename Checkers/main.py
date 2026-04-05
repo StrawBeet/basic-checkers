@@ -492,8 +492,9 @@ def best_move(color1, color2):
     start_color2 = copy.deepcopy(color2)
     test_color1 = copy.deepcopy(color1)
     test_color2 = copy.deepcopy(color2)
+    checking_color1 = copy.deepcopy(color1)
+    checking_color2 = copy.deepcopy(color2)
     moves = [i for i in color1.captures(color2) if len(color1.captures(color2)[i]) > 0]
-    current_moves = None
     if len(moves) == 0:
         moves = [i for i in color1.legal_moves(color2) if len(color1.legal_moves(color2)[i]) > 0]
         if len(moves) > 0:
@@ -515,13 +516,45 @@ def best_move(color1, color2):
     else:
         for i in moves:
             for k in start_color1.captures(start_color2)[i]:
-                test_color1, test_color2 = captures(start_color1, start_color2, i, k[0], k[1])
+                test_color1, test_color2 = test_color1.captures(start_color1, start_color2, i, k[0], k[1])
                 current_moves = [j for j in test_color1.captures(test_color2) if len(test_color1.captues(test_color2)[j]) > 0]
                 if len(current_moves) > 0:
-                    pass
+                    for j in current_moves:
+                        for l in test_color1.captures(test_color2)[j]:
+                            checking_color1, checking_color2 = captures(test_color1, test_color2, j, l[0], l[1])
+                            if value(checking_color1, checking_color2) > value(best_color1, best_color2):
+                                best = [i,j]
+                                best_color1 = copy.deepcopy(checking_color1)
+                                best_color2 = copy.deepcopy(checking_color2)
+                            elif value(checking_color1, checking_color2) > value(best_color1, best_color2):
+                                best.append(i,j)
+                            else:
+                                pass
                 else:
-                    pass
+                    current_moves = [j for j in test_color2.captures(test_color1) if len(test_color2.captures(test_color1)[j]) > 0]
+                    if len(current_moves) > 0:
+                        for j in current_moves:
+                            for l in test_color2.captures(test_color1)[j]:
+                                checking_color1, checking_color2 = captures(test_color1, test_color2, j, l[0], l[1])
+                                if value(checking_color1, checking_color2) > value(checking_color1, checking_color2):
+                                    best = [[i]]
+                                elif value(checking_color1, checking_color2) == value(best_color1, best_color2):
+                                    best.append([i])
+                                else:
+                                    pass
+                    else:
+                        if value(test_color1, test_color2) > value(best_color1, best_color2):
+                            best = i
+                            best_color1 = copy.deepcopy(test_color1)
+                            best_color2 = copy.deepcopy(test_color2)
+                        elif value(test_color1, test_color2) == value(best_color1, best_color2):
+                            best.append(i)
 
+    if len(best) > 0:
+        n = randint(0, len(best))
+        return best[n]
+    else:
+        return []
 
 
 screen.fill(dark_green) # So that the screen isn't filled too many times every second
@@ -571,6 +604,7 @@ while running:
             #print("Previous:",previous_chosen, previous_moves)
             #print(capture)
             if pygame.mouse.get_pressed()[0]:
+
                 for i in range(32):
                     # Checks whether the mouse collides with where a piece could be. There cannot be any pieces on the white squares
                     if black_rects[i].scale_by(0.8).collidepoint(mouse_pos):
@@ -671,7 +705,55 @@ while running:
                                 draw_board()
 
                 else:
-                    turn = (turn + 1) % 2
+                    if turn % 2 == 0:
+                        if pygame.mouse.get_pressed()[0]:
+                            for k in previous_moves:
+                                if black_rects[int((k[0] - k[0] % 2) / 2 + 4 * k[1])].scale_by(0.7).collidepoint(mouse_pos):
+                                    if capture:
+                                        whiteCheckers, blackCheckers = captures(whiteCheckers, blackCheckers,
+                                                                                previous_chosen, capture, k)
+                                        turn_end = True
+                                        capture = []
+                                    else:
+                                        whiteCheckers = move(whiteCheckers, previous_chosen, k)
+                                        # pygame.draw.rect(screen, brown, black_rects[int((previous_chosen[0] - previous_chosen[0] % 2) / 2 + 4 * previous_chosen[1])])
+                                        draw_board()
+                                        draw_pieces(whiteCheckers.board, blackCheckers.board)
+                                        turn_end = True
+                                else:
+                                    pass
+                            if being_moved:
+                                for j in whiteCheckers.captures(blackCheckers).copy()[being_moved]:
+                                    capture = j[0:len(j) - 1][0]
+                                    previous_moves = j[-1:]
+                                if capture == []:
+                                    previous_moves = []
+                                if len(previous_moves) == 0:
+                                    previous_moves = whiteCheckers.legal_moves(blackCheckers).copy()[being_moved]
+                                else:
+                                    capture_possible = True
+                            else:
+                                pass
+                            previous_chosen = being_moved
+                            if turn_end:
+                                print("Turn end")
+                                capture = []
+                                previous_moves = []
+                                previous_chosen = -1
+                                turn = (turn + 1) % 2
+                                turn_end = False
+                                promote()
+                                draw_board()
+                    else:
+                        chosen = best_move(blackCheckers, whiteCheckers)
+                        if len(chosen) > 0:
+                            if len(chosen) == 2:
+                                #blackCheckers, whiteCheckers = captures(blackCheckers, whiteCheckers, )
+                                pass
+                        else:
+                            pass
+                        turn = (turn + 1) % 2
+
             if len([k for k in whiteCheckers.board if whiteCheckers.board[k] > 0]) == 0:
                 game_active = False
                 game_end = True
