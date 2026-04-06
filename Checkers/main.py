@@ -6,7 +6,6 @@ import copy
 pygame.init()
 screen = pygame.display.set_mode((1080, 864))
 clock = pygame.time.Clock()
-running = True
 menu = True
 game_active = False
 bot = False
@@ -15,7 +14,7 @@ turn = 0
 turn_end = False
 game_end = False
 
-move_sfx = pygame.mixer.music.load('sfx/piece_moving.wav')
+pygame.mixer.music.load('sfx/piece_moving.ogg')
 
 player_color = 0
 previous_chosen = -1
@@ -384,63 +383,115 @@ def promote():
         if i[1] == 0 and blackCheckers.board[i] == 1:
             blackCheckers.board[i] = 3
 
-def draw_pieces(white, black):
+def draw_pieces(white, black, reversed=False):
     # Draws all the checkers pieces that are on the board
-    for i in [i for i in white if white[i] == 1]:
-        pygame.draw.circle(screen, 'White', (190 + 100 * i[0], 782 - 100 * i[1]), 40)
-        pygame.draw.circle(screen, 'Black', (190 + 100 * i[0], 782 - 100 * i[1]), 40, 1)
+    if not reversed:
+        for i in [i for i in white if white[i] == 1]:
+            pygame.draw.circle(screen, 'White', (190 + 100 * i[0], 782 - 100 * i[1]), 40)
+            pygame.draw.circle(screen, 'Black', (190 + 100 * i[0], 782 - 100 * i[1]), 40, 1)
 
-    for i in [i for i in black if black[i] == 1]:
-        pygame.draw.circle(screen, 'Black', (190 + 100 * i[0], 782 - 100 * i[1]), 40)
-        pygame.draw.circle(screen, 'White', (190 + 100 * i[0], 782 - 100 * i[1]), 40, 1)
+        for i in [i for i in black if black[i] == 1]:
+            pygame.draw.circle(screen, 'Black', (190 + 100 * i[0], 782 - 100 * i[1]), 40)
+            pygame.draw.circle(screen, 'White', (190 + 100 * i[0], 782 - 100 * i[1]), 40, 1)
 
-    for i in [i for i in white if white[i] == 3]:
-        pygame.draw.circle(screen, 'White', (190 + 100 * i[0], 782 - 100 * i[1]), 40)
-        pygame.draw.circle(screen, 'Black', (190 + 100 * i[0], 782 - 100 * i[1]), 40, 1)
-        pygame.draw.circle(screen, 'Black', (190 + 100 * i[0], 782 - 100 * i[1]), 10, 5)
+        for i in [i for i in white if white[i] == 3]:
+            pygame.draw.circle(screen, 'White', (190 + 100 * i[0], 782 - 100 * i[1]), 40)
+            pygame.draw.circle(screen, 'Black', (190 + 100 * i[0], 782 - 100 * i[1]), 40, 1)
+            pygame.draw.circle(screen, 'Black', (190 + 100 * i[0], 782 - 100 * i[1]), 10, 5)
 
-    for i in [i for i in black if black[i] == 3]:
-        pygame.draw.circle(screen, 'Black', (190 + 100 * i[0], 782 - 100 * i[1]), 40)
-        pygame.draw.circle(screen, 'White', (190 + 100 * i[0], 782 - 100 * i[1]), 40, 1)
-        pygame.draw.circle(screen, 'White', (190 + 100 * i[0], 782 - 100 * i[1]), 10, 5)
+        for i in [i for i in black if black[i] == 3]:
+            pygame.draw.circle(screen, 'Black', (190 + 100 * i[0], 782 - 100 * i[1]), 40)
+            pygame.draw.circle(screen, 'White', (190 + 100 * i[0], 782 - 100 * i[1]), 40, 1)
+            pygame.draw.circle(screen, 'White', (190 + 100 * i[0], 782 - 100 * i[1]), 10, 5)
+    else:
+        for i in [i for i in white if white[i] == 1]:
+            pygame.draw.circle(screen, 'White', (190 + 100 * (7 - i[0]), 782 - 100 * (7 - i[1])), 40)
+            pygame.draw.circle(screen, 'Black', (190 + 100 * (7 - i[0]), 782 - 100 * (7 - i[1])), 40, 1)
 
-def draw_moves(white, black, square):
+        for i in [i for i in black if black[i] == 1]:
+            pygame.draw.circle(screen, 'Black', (190 + 100 * (7 - i[0]), 782 - 100 * (7 - i[1])), 40)
+            pygame.draw.circle(screen, 'White', (190 + 100 * (7 - i[0]), 782 - 100 * (7 - i[1])), 40, 1)
+
+        for i in [i for i in white if white[i] == 3]:
+            pygame.draw.circle(screen, 'White', (190 + 100 * (7 - i[0]), 782 - 100 *  (7 - i[1])), 40)
+            pygame.draw.circle(screen, 'Black', (190 + 100 * (7 - i[0]), 782 - 100 * (7 - i[1])), 40, 1)
+            pygame.draw.circle(screen, 'Black', (190 + 100 * (7 - i[0]), 782 - 100 * (7 - i[1])), 10, 5)
+
+        for i in [i for i in black if black[i] == 3]:
+            pygame.draw.circle(screen, 'Black', (190 + 100 * (7 - i[0]), 782 - 100 * (7 - i[1])), 40)
+            pygame.draw.circle(screen, 'White', (190 + 100 * (7 - i[0]), 782 - 100 * (7 - i[1])), 40, 1)
+            pygame.draw.circle(screen, 'White', (190 + 100 * (7 - i[0]), 782 - 100 * (7 - i[1])), 10, 5)
+
+def draw_moves(white, black, square, reversed=False):
     moves = white.captures(black)[square]
     # The code below draws the possible moves if you clicked on a piece
-    if white.board[square] == 1:
-        if len([k for k in white.captures(black) if white.captures(black)[k] != []]) == 0:
-            moves = white.legal_moves(black)[square]
-            for i in moves:
-                pygame.draw.circle(screen, (0, 0, 255, 180), (190 + 100 * i[0], 782 - 100 * i[1]), 20)
-                pygame.draw.circle(screen, 'White', (190 + 100 * i[0], 782 - 100 * i[1]), 20,
-                                   1)
-        elif len(moves) > 0:
-            for i in moves:
-                pygame.draw.circle(screen, (0, 0, 255, 180), (190 + 100 * i[1][0],
-                                                              782 - 100 * i[1][1]), 20)
-                pygame.draw.circle(screen, 'White', (190 + 100 * i[1][0],
-                                                     782 - 100 * i[1][1]), 20,
-                                   1)
-    elif white.board[square] == 3:
-        if len([k for k in white.captures(black) if white.captures(black)[k] != []]) == 0:
-            moves = white.legal_moves(black)[square]
-            for i in moves:
-                pygame.draw.circle(screen, (0, 0, 255, 180), (190 + 100 * i[0], 782 - 100 * i[1]), 20)
-                pygame.draw.circle(screen, 'White', (190 + 100 * i[0], 782 - 100 * i[1]), 20,
-                                   1)
-        elif len(moves) > 0:
-            for i in moves:
-                pygame.draw.circle(screen, (0, 0, 255, 180), (190 + 100 * i[1][0],
-                                                              782 - 100 * i[1][1]), 20)
-                pygame.draw.circle(screen, 'White', (190 + 100 * i[1][0],
-                                                     782 - 100 * i[1][1]), 20,
-                                   1)
+    if not reversed:
+        if white.board[square] == 1:
+            if len([k for k in white.captures(black) if white.captures(black)[k] != []]) == 0:
+                moves = white.legal_moves(black)[square]
+                for i in moves:
+                    pygame.draw.circle(screen, (0, 0, 255, 180), (190 + 100 * i[0], 782 - 100 * i[1]), 20)
+                    pygame.draw.circle(screen, 'White', (190 + 100 * i[0], 782 - 100 * i[1]), 20,
+                                       1)
+            elif len(moves) > 0:
+                for i in moves:
+                    pygame.draw.circle(screen, (0, 0, 255, 180), (190 + 100 * i[1][0],
+                                                                  782 - 100 * i[1][1]), 20)
+                    pygame.draw.circle(screen, 'White', (190 + 100 * i[1][0],
+                                                         782 - 100 * i[1][1]), 20,
+                                       1)
+        elif white.board[square] == 3:
+            if len([k for k in white.captures(black) if white.captures(black)[k] != []]) == 0:
+                moves = white.legal_moves(black)[square]
+                for i in moves:
+                    pygame.draw.circle(screen, (0, 0, 255, 180), (190 + 100 * i[0], 782 - 100 * i[1]), 20)
+                    pygame.draw.circle(screen, 'White', (190 + 100 * i[0], 782 - 100 * i[1]), 20,
+                                       1)
+            elif len(moves) > 0:
+                for i in moves:
+                    pygame.draw.circle(screen, (0, 0, 255, 180), (190 + 100 * i[1][0],
+                                                                  782 - 100 * i[1][1]), 20)
+                    pygame.draw.circle(screen, 'White', (190 + 100 * i[1][0],
+                                                         782 - 100 * i[1][1]), 20,
+                                       1)
+    else:
+        if white.board[square] == 1:
+            if len([k for k in white.captures(black) if white.captures(black)[k] != []]) == 0:
+                moves = white.legal_moves(black)[square]
+                for i in moves:
+                    pygame.draw.circle(screen, (0, 0, 255, 180), (190 + 100 * (7 - i[0]), 782 - 100 * (7 - i[1])), 20)
+                    pygame.draw.circle(screen, 'White', (190 + 100 * (7 - i[0]), 782 - 100 * (7 - i[1])), 20,
+                                       1)
+            elif len(moves) > 0:
+                for i in moves:
+                    pygame.draw.circle(screen, (0, 0, 255, 180), (190 + 100 * (7 - i[1][0]),
+                                                                  782 - 100 * (7 - i[1][1])), 20)
+                    pygame.draw.circle(screen, 'White', (190 + 100 * i[1][0],
+                                                         782 - 100 * (7 - i[1][1])), 20,
+                                       1)
+        elif white.board[square] == 3:
+            if len([k for k in white.captures(black) if white.captures(black)[k] != []]) == 0:
+                moves = white.legal_moves(black)[square]
+                for i in moves:
+                    pygame.draw.circle(screen, (0, 0, 255, 180), (190 + 100 * (7 - i[0]), 782 - 100 * (7 - i[1])), 20)
+                    pygame.draw.circle(screen, 'White', (190 + 100 * (7 - i[0]), 782 - 100 * (7 - i[1])), 20,
+                                       1)
+            elif len(moves) > 0:
+                for i in moves:
+                    pygame.draw.circle(screen, (0, 0, 255, 180), (190 + 100 * (7 - i[1][0]),
+                                                                  782 - 100 * (7 - i[1][1])), 20)
+                    pygame.draw.circle(screen, 'White', (190 + 100 * (7 - i[1][0]),
+                                                         782 - 100 * (7 - i[1][1])), 20,
+                                       1)
 
-def draw_board():
+def draw_board(reversed=False):
     for i in range(32):
         pygame.draw.rect(screen, beige, white_rects[i])
         pygame.draw.rect(screen, brown, black_rects[i])
-    draw_pieces(whiteCheckers.board, blackCheckers.board)
+    if not reversed:
+        draw_pieces(whiteCheckers.board, blackCheckers.board)
+    else:
+        draw_pieces(whiteCheckers.board, blackCheckers.board, True)
 
 def move(color, moved, move_to):
     """Moved indicated the piece moved while move indicates where it moves to"""
@@ -449,7 +500,7 @@ def move(color, moved, move_to):
     pygame.mixer.music.play(loops=0, start=0.0, fade_ms=0)
     return color
 
-def captures(color1, color2, moved, captured, move_to):
+def captures(color1, color2, moved, captured, move_to, reversed=False):
     global mouse_pos
     """Moved indicates the piece moved, captures is a list indicating all the captured pieces, move_to indicates
     where the piece moves, color1 represents the color whose turn it is and color2 represents the other player"""
@@ -464,39 +515,73 @@ def captures(color1, color2, moved, captured, move_to):
 
     if len(possibilities) == 0:
         return color1, color2
-
-    for i in range(32):
-        pygame.draw.rect(screen, beige, white_rects[i])
-        pygame.draw.rect(screen, brown, black_rects[i])
-    if color1.first:
-        draw_pieces(color1.board, color2.board)
-    else:
-        draw_pieces(color2.board, color1.board)
-    pygame.display.flip()
-    while capturing:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                exit()
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_s:
-                    capturing = False
-            if event.type == pygame.MOUSEMOTION:
-                mouse_pos = pygame.mouse.get_pos()
-        if len(possibilities) == 0 or not capturing:
-            break
-        draw_moves(color1, color2, previous)
+    if not reversed:
+        for i in range(32):
+            pygame.draw.rect(screen, beige, white_rects[i])
+            pygame.draw.rect(screen, brown, black_rects[i])
+        if color1.first:
+            draw_pieces(color1.board, color2.board)
+        else:
+            draw_pieces(color2.board, color1.board)
         pygame.display.flip()
-        if pygame.mouse.get_pressed()[0]:
-            for i in range(32):
-                for k in possibilities:
-                    if black_rects[int((k[1][0] - k[1][0] % 2) / 2 + 4 * k[1][1])].scale_by(0.7).collidepoint(mouse_pos):
-                        color2.board[k[0]] = 0
-                        color1.board[k[1]] = color1.board[previous]
-                        color1.board[previous] = 0
-                        previous = k[1]
-                        pygame.mixer.music.play(loops=0, start=0.0, fade_ms=0)
-                        draw_board()
-                        possibilities = color1.captures(color2)[previous]
+        while capturing:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    exit()
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_s:
+                        capturing = False
+                if event.type == pygame.MOUSEMOTION:
+                    mouse_pos = pygame.mouse.get_pos()
+            if len(possibilities) == 0 or not capturing:
+                break
+            draw_moves(color1, color2, previous)
+            pygame.display.flip()
+            if pygame.mouse.get_pressed()[0]:
+                for i in range(32):
+                    for k in possibilities:
+                        if black_rects[int((k[1][0] - k[1][0] % 2) / 2 + 4 * k[1][1])].scale_by(0.7).collidepoint(mouse_pos):
+                            color2.board[k[0]] = 0
+                            color1.board[k[1]] = color1.board[previous]
+                            color1.board[previous] = 0
+                            previous = k[1]
+                            pygame.mixer.music.play(loops=0, start=0.0, fade_ms=0)
+                            draw_board()
+                            possibilities = color1.captures(color2)[previous]
+    else:
+        for i in range(32):
+            pygame.draw.rect(screen, beige, white_rects[i])
+            pygame.draw.rect(screen, brown, black_rects[i])
+        if color1.first:
+            draw_pieces(color1.board, color2.board, reversed)
+        else:
+            draw_pieces(color2.board, color1.board, reversed)
+        pygame.display.flip()
+        while capturing:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    exit()
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_s:
+                        capturing = False
+                if event.type == pygame.MOUSEMOTION:
+                    mouse_pos = pygame.mouse.get_pos()
+            if len(possibilities) == 0 or not capturing:
+                break
+            draw_moves(color1, color2, previous, reversed)
+            pygame.display.flip()
+            if pygame.mouse.get_pressed()[0]:
+                for i in range(32):
+                    for k in possibilities:
+                        if black_rects[int((k[1][0] - k[1][0] % 2) / 2 + 4 * k[1][1])].scale_by(0.7).collidepoint(
+                                mouse_pos):
+                            color2.board[k[0]] = 0
+                            color1.board[k[1]] = color1.board[previous]
+                            color1.board[previous] = 0
+                            previous = k[1]
+                            pygame.mixer.music.play(loops=0, start=0.0, fade_ms=0)
+                            draw_board(reversed)
+                            possibilities = color1.captures(color2)[previous]
 
     return color1, color2
 
@@ -625,6 +710,7 @@ def best_move(color1, color2):
 
 
 screen.fill(dark_green) # So that the screen isn't filled too many times every second
+running = True
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -649,12 +735,11 @@ while running:
                 menu = False
                 game_active = True
                 bot = True
-                player_color = randint(0, 2)
-                print(player_color, randint(0,2))
+                player_color = randint(0, 1)
 
             if not menu:
                 screen.fill(dark_green)
-                draw_board()
+                draw_board(player_color == 1)
                 screen.blit(return_button, return_button_rect)
                 if bot:
                     if player_color == 0:
@@ -713,27 +798,48 @@ while running:
             if pygame.mouse.get_pressed()[0]:
                 if return_button_rect.collidepoint(mouse_pos):
                     return_menu = True
-
-                for i in range(32):
-                    # Checks whether the mouse collides with where a piece could be. There cannot be any pieces on the white squares
-                    if black_rects[i].scale_by(0.8).collidepoint(mouse_pos):
-                        if (i // 4) % 2 == 0:
-                            being_moved = ((i % 4) * 2, i // 4)
-                        else:
-                            being_moved = ((i % 4) * 2 + 1, i // 4)
-                        for k in previous_moves:
-                            if k[1] % 2 == 0:
-                                pygame.draw.rect(screen, brown, black_rects[int((k[0] / 2) + 4 * k[1])])
+                if player_color != 1:
+                    for i in range(32):
+                        # Checks whether the mouse collides with where a piece could be. There cannot be any pieces on the white squares
+                        if black_rects[i].scale_by(0.8).collidepoint(mouse_pos):
+                            if (i // 4) % 2 == 0:
+                                being_moved = ((i % 4) * 2, i // 4)
                             else:
-                                pygame.draw.rect(screen, brown, black_rects[int((k[0] - 1) / 2 + 4 * k[1])])
-                        if turn % 2 == 0:
-                            draw_moves(whiteCheckers, blackCheckers, being_moved)
-                        else:
-                            draw_moves(blackCheckers, whiteCheckers, being_moved)
+                                being_moved = ((i % 4) * 2 + 1, i // 4)
+                            for k in previous_moves:
+                                if k[1] % 2 == 0:
+                                    pygame.draw.rect(screen, brown, black_rects[int((k[0] / 2) + 4 * k[1])])
+                                else:
+                                    pygame.draw.rect(screen, brown, black_rects[int((k[0] - 1) / 2 + 4 * k[1])])
+                            if turn % 2 == 0:
+                                draw_moves(whiteCheckers, blackCheckers, being_moved)
+                            else:
+                                draw_moves(blackCheckers, whiteCheckers, being_moved)
 
-                    else:
-                        if previous_moves == []:
-                            pass
+                        else:
+                            if previous_moves == []:
+                                pass
+                else:
+                    for i in range(32):
+                        # Checks whether the mouse collides with where a piece could be. There cannot be any pieces on the white squares
+                        if black_rects[31 - i].scale_by(0.8).collidepoint(mouse_pos):
+                            if (i // 4) % 2 == 0:
+                                being_moved = ((i % 4) * 2, i // 4)
+                            else:
+                                being_moved = ((i % 4) * 2 + 1, i // 4)
+                            for k in previous_moves:
+                                if (7 - k[1]) % 2 == 0:
+                                    pygame.draw.rect(screen, brown, black_rects[31 - int((k[0] / 2) + 4 * k[1])])
+                                else:
+                                    pygame.draw.rect(screen, brown, black_rects[31 - int((k[0] - 1) / 2 + 4 * k[1])])
+                            if turn % 2 == 0:
+                                draw_moves(whiteCheckers, blackCheckers, being_moved, True)
+                            else:
+                                draw_moves(blackCheckers, whiteCheckers, being_moved, True)
+
+                        else:
+                            if previous_moves == []:
+                                pass
 
                 if not bot:
                     if turn % 2 == 0:
@@ -891,23 +997,23 @@ while running:
                             else:
                                 pass
                             promote()
-                            draw_board()
+                            draw_board(True)
                             turn = (turn + 1) % 2
                         else:
                             if pygame.mouse.get_pressed()[0]:
                                 for k in previous_moves:
-                                    if black_rects[int((k[0] - k[0] % 2) / 2 + 4 * k[1])].scale_by(0.7).collidepoint(
+                                    if black_rects[31 - int((k[0] - k[0] % 2) / 2 + 4 * k[1])].scale_by(0.7).collidepoint(
                                             mouse_pos):
+
                                         if capture:
                                             blackCheckers, whiteCheckers = captures(blackCheckers, whiteCheckers,
-                                                                                    previous_chosen, capture, k)
+                                                                                    previous_chosen, capture, k, True)
                                             turn_end = True
                                             capture = []
                                         else:
                                             blackCheckers = move(blackCheckers, previous_chosen, k)
                                             # pygame.draw.rect(screen, brown, black_rects[int((previous_chosen[0] - previous_chosen[0] % 2) / 2 + 4 * previous_chosen[1])])
-                                            draw_board()
-                                            draw_pieces(whiteCheckers.board, blackCheckers.board)
+                                            draw_board(True)
                                             turn_end = True
                                     elif return_button_rect.collidepoint(mouse_pos):
                                         pass
@@ -936,7 +1042,7 @@ while running:
                                                                                            blackCheckers)) / total_turns
                                     turn_end = False
                                     promote()
-                                    draw_board()
+                                    draw_board(True)
 
             if len([k for k in whiteCheckers.board if whiteCheckers.board[k] > 0]) == 0:
                 game_active = False
