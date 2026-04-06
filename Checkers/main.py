@@ -15,6 +15,7 @@ turn = 0
 turn_end = False
 game_end = False
 
+player_color = 0
 previous_chosen = -1
 being_moved = 0
 capture = []
@@ -40,17 +41,17 @@ bot_text = font.render("Play Against a Bot", True, 'White')
 bot_text_rect = bot_text.get_rect(center = bot_rect.center)
 bot_surf.fill('black')
 
-return_surf = pygame.Surface((305, 324))
-return_rect = return_surf.get_rect(center = (screen.get_rect().centerx - 200, screen.get_rect().centery + 330))
+return_surf = pygame.Surface((305, 216))
+return_rect = return_surf.get_rect(center = (screen.get_rect().centerx - 275, screen.get_rect().centery + 330))
 return_text = font.render("Return to Menu", True, 'White')
 return_text_rect = return_text.get_rect(center = return_rect.center)
-return_outline = pygame.Rect(return_rect.topleft[0], return_rect.topleft[1], 305, 324)
+return_outline = pygame.Rect(return_rect.topleft[0], return_rect.topleft[1], 305, 216)
 
-continue_surf = pygame.Surface((305, 324))
-continue_rect = continue_surf.get_rect(center = (screen.get_rect().centerx + 200, screen.get_rect().centery + 330))
+continue_surf = pygame.Surface((305, 216))
+continue_rect = continue_surf.get_rect(center = (screen.get_rect().centerx + 275, screen.get_rect().centery + 330))
 continue_text = font.render("Continue Playing", True, 'White')
 continue_text_rect = continue_text.get_rect(center = continue_rect.center)
-continue_outline = pygame.Rect(continue_rect.topleft[0], continue_rect.topleft[1], 305, 324)
+continue_outline = pygame.Rect(continue_rect.topleft[0], continue_rect.topleft[1], 305, 216)
 
 return_button = pygame.Surface((135, 108))
 return_button_rect = return_button.get_rect(topleft = (0,0))
@@ -62,8 +63,26 @@ end_text = None
 title_text = title_font.render("Checkers", True, 'Black')
 title_rect = title_text.get_rect(center = (screen.get_rect().centerx, 100))
 
+player_text = None
+player_text_rect = None
+
+help_text = title_font.render("Press S while capturing multiple pieces if you want to stop")
+help_rect = help_text.get_rect(bottom = screen.get_rect().midbottom)
+
 white_rects = []
 black_rects = []
+
+score_surf = pygame.Surface((305, 216))
+w_score_rect = score_surf.get_rect(center = (screen.get_rect().centerx - 275, screen.get_rect().centery - 330))
+b_score_rect = score_surf.get_rect(center = (screen.get_rect().centerx + 275, screen.get_rect().centery - 330))
+w_score_text = font.render('White\'s Score:', True, 'White')
+b_score_text = font.render('Black\'s Score:', True, 'White')
+pers_score_text = font.render('Your Score:', True, 'White')
+
+pers_score = 0
+white_score = 0
+black_score = 0
+total_turns = 0
 
 for i in range(8):
     if i % 2 == 0:
@@ -633,17 +652,68 @@ while running:
                 menu = False
                 game_active = True
                 bot = True
+                player_color = randint(0, 2)
+                if player_color == 0:
+                    player_text = font.render('You are Playing as White', True, 'Black')
+                    player_text_rect = player_text.get_rect(midtop = screen.get_rect().midtop)
+                    screen.blit(player_text, player_text_rect)
+                else:
+                    player_text = font.render('You are Playing as Black', True, 'Black')
+                    player_text_rect = player_text.get_rect(midtop = screen.get_rect().midtop)
+                    screen.blit(player_text, player_text_rect)
 
             if not menu:
                 screen.fill(dark_green)
                 draw_board()
-                pygame.draw.rect(screen, 'Black', return_button_rect)
+                screen.blit(return_button, return_button_rect)
+    elif return_menu:
+        screen.fill(shaded)
+        screen.blit(return_surf, return_rect)
+        screen.blit(return_text, return_text_rect)
+        pygame.draw.rect(screen, 'White', return_outline, 5)
+        screen.blit(continue_surf, continue_rect)
+        screen.blit(continue_text, continue_text_rect)
+        pygame.draw.rect(screen, 'White', continue_outline, 5)
+        if pygame.mouse.get_pressed()[0]:
+            if return_rect.collidepoint(mouse_pos):
+                print("Returning to main menu")
+                menu = True
+                game_active = False
+                bot = False
+                return_menu = False
+                screen.fill(dark_green)
+                whiteCheckers.board = copy.deepcopy(white_board)
+                blackCheckers.board = copy.deepcopy(black_board)
+                capture = []
+                previous_moves = []
+                previous_chosen = -1
+                turn = 0
+                white_score = 0
+                black_score = 0
+                pers_score = 0
+                total_turns = 0
+            elif continue_rect.collidepoint(mouse_pos):
+                print("Returning to game")
+                return_menu = False
+                screen.fill(dark_green)
+                draw_board()
+                screen.blit(return_button, return_button_rect)
+                if bot:
+                    if player_color == 0:
+                        player_text = font.render('You are Playing as White', True, 'Black')
+                        player_text_rect = player_text.get_rect(midtop = screen.get_rect().midtop)
+                        screen.blit(player_text, player_text_rect)
+                    else:
+                        player_text = font.render('You are Playing as Black', True, 'Black')
+                        player_text_rect = player_text.get_rect(midtop = screen.get_rect().midtop)
+                        screen.blit(player_text, player_text_rect)
 
     else:
         if game_active:
-            #print("Previous:",previous_chosen, previous_moves)
-            #print(capture)
+            screen.blit(help_text, help_rect)
             if pygame.mouse.get_pressed()[0]:
+                if return_button_rect.collidepoint(mouse_pos):
+                    return_menu = True
 
                 for i in range(32):
                     # Checks whether the mouse collides with where a piece could be. There cannot be any pieces on the white squares
@@ -697,11 +767,12 @@ while running:
                                 pass
                             previous_chosen = being_moved
                             if turn_end:
-                                print("Turn end")
                                 capture = []
                                 previous_moves = []
                                 previous_chosen = -1
                                 turn = (turn + 1) % 2
+                                total_turns += 1
+                                white_score = ((total_turns - 1) * white_score + value(whiteCheckers, blackCheckers)) / total_turns
                                 turn_end = False
                                 promote()
                                 draw_board()
@@ -737,71 +808,127 @@ while running:
                                 pass
                             previous_chosen = being_moved
                             if turn_end:
-                                print("Turn end")
                                 capture = []
                                 previous_moves = []
                                 previous_chosen = -1
                                 turn = (turn + 1) % 2
+                                black_score = ((total_turns - 1) * black_score + value(whiteCheckers, blackCheckers)) / total_turns
                                 turn_end = False
                                 promote()
                                 draw_board()
 
                 else:
-                    if turn % 2 == 0:
-                        if pygame.mouse.get_pressed()[0]:
-                            for k in previous_moves:
-                                if black_rects[int((k[0] - k[0] % 2) / 2 + 4 * k[1])].scale_by(0.7).collidepoint(mouse_pos):
-                                    if capture:
-                                        whiteCheckers, blackCheckers = captures(whiteCheckers, blackCheckers,
-                                                                                previous_chosen, capture, k)
-                                        turn_end = True
-                                        capture = []
+                    if player_color == 0:
+                        if turn % 2 == 0:
+                            if pygame.mouse.get_pressed()[0]:
+                                for k in previous_moves:
+                                    if black_rects[int((k[0] - k[0] % 2) / 2 + 4 * k[1])].scale_by(0.7).collidepoint(mouse_pos):
+                                        if capture:
+                                            whiteCheckers, blackCheckers = captures(whiteCheckers, blackCheckers,
+                                                                                    previous_chosen, capture, k)
+                                            turn_end = True
+                                            capture = []
+                                        else:
+                                            whiteCheckers = move(whiteCheckers, previous_chosen, k)
+                                            # pygame.draw.rect(screen, brown, black_rects[int((previous_chosen[0] - previous_chosen[0] % 2) / 2 + 4 * previous_chosen[1])])
+                                            draw_board()
+                                            draw_pieces(whiteCheckers.board, blackCheckers.board)
+                                            turn_end = True
                                     else:
-                                        whiteCheckers = move(whiteCheckers, previous_chosen, k)
-                                        # pygame.draw.rect(screen, brown, black_rects[int((previous_chosen[0] - previous_chosen[0] % 2) / 2 + 4 * previous_chosen[1])])
-                                        draw_board()
-                                        draw_pieces(whiteCheckers.board, blackCheckers.board)
-                                        turn_end = True
+                                        pass
+                                if being_moved:
+                                    for j in whiteCheckers.captures(blackCheckers).copy()[being_moved]:
+                                        capture = j[0:len(j) - 1][0]
+                                        previous_moves = j[-1:]
+                                    if capture == []:
+                                        previous_moves = []
+                                    if len(previous_moves) == 0:
+                                        previous_moves = whiteCheckers.legal_moves(blackCheckers).copy()[being_moved]
+                                    else:
+                                        capture_possible = True
                                 else:
                                     pass
-                            if being_moved:
-                                for j in whiteCheckers.captures(blackCheckers).copy()[being_moved]:
-                                    capture = j[0:len(j) - 1][0]
-                                    previous_moves = j[-1:]
-                                if capture == []:
+                                previous_chosen = being_moved
+                                if turn_end:
+                                    print("Turn end")
+                                    capture = []
                                     previous_moves = []
-                                if len(previous_moves) == 0:
-                                    previous_moves = whiteCheckers.legal_moves(blackCheckers).copy()[being_moved]
+                                    previous_chosen = -1
+                                    turn = (turn + 1) % 2
+                                    total_turns += 1
+                                    pers_score = ((total_turns - 1) * pers_score + value(whiteCheckers, blackCheckers)) / total_turns
+                                    turn_end = False
+                                    promote()
+                                    draw_board()
+                        else:
+                            chosen = best_move(blackCheckers, whiteCheckers)
+                            if len(chosen) > 0:
+                                if len(chosen) == 3:
+                                    blackCheckers, whiteCheckers = bot_capture(blackCheckers, whiteCheckers, chosen[0], chosen[2][0][0], chosen[2][0][1])
+                                    blackCheckers, whiteCheckers = bot_capture(blackCheckers, whiteCheckers, chosen[1], chosen[2][1][0], chosen[2][1][1])
+                                elif len(chosen) == 2:
+                                    blackCheckers, whiteCheckers = bot_capture(blackCheckers, whiteCheckers, chosen[0], chosen[1][0][0], chosen[1][0][1])
                                 else:
-                                    capture_possible = True
+                                    blackCheckers = move(blackCheckers, chosen[0][0], chosen[0][1])
+
                             else:
                                 pass
-                            previous_chosen = being_moved
-                            if turn_end:
-                                print("Turn end")
-                                capture = []
-                                previous_moves = []
-                                previous_chosen = -1
-                                turn = (turn + 1) % 2
-                                turn_end = False
-                                promote()
-                                draw_board()
+                            promote()
+                            draw_board()
+                            turn = (turn + 1) % 2
                     else:
-                        chosen = best_move(blackCheckers, whiteCheckers)
-                        if len(chosen) > 0:
+                        if turn % 2 == 0:
+                            chosen = best_move(whiteCheckers, blackCheckers)
                             if len(chosen) == 3:
-                                blackCheckers, whiteCheckers = captures(blackCheckers, whiteCheckers, chosen[0], chosen[2][0][0], chosen[2][0][1])
-                                blackCheckers, whiteCheckers = captures(blackCheckers, whiteCheckers, chosen[1], chosen[2][1][0], chosen[2][1][1])
+                                whiteCheckers, blackCheckers = bot_capture(whiteCheckers, blackCheckers, chosen[0], chosen[2][0][0], chosen[2][0][1])
+                                whiteCheckers, blackCheckers = bot_capture(whiteCheckers, blackCheckers, chosen[1], chosen[2][1][0], chosen[2][1][1])
                             elif len(chosen) == 2:
-                                blackCheckers, whiteCheckers = captures(blackCheckers, whiteCheckers, chosen[0], chosen[1][0][0], chosen[1][0][1])
+                                whiteCheckers, blackCheckers = bot_capture(whiteCheckers, blackCheckers, chosen[0], chosen[1][0][0], chosen[1][0][1])
                             else:
-                                blackCheckers = move(blackCheckers, chosen[0][0], chosen[0][1])
-
+                                whiteCheckers = move(whiteCheckers, chosen[0][0], chosen[0][1])
                         else:
-                            pass
-                        promote()
-                        draw_board()
-                        turn = (turn + 1) % 2
+                            if pygame.mouse.get_pressed()[0]:
+                                for k in previous_moves:
+                                    if black_rects[int((k[0] - k[0] % 2) / 2 + 4 * k[1])].scale_by(0.7).collidepoint(
+                                            mouse_pos):
+                                        if capture:
+                                            blackCheckers, whiteCheckers = captures(blackCheckers, whiteCheckers,
+                                                                                    previous_chosen, capture, k)
+                                            turn_end = True
+                                            capture = []
+                                        else:
+                                            blackCheckers = move(blackCheckers, previous_chosen, k)
+                                            # pygame.draw.rect(screen, brown, black_rects[int((previous_chosen[0] - previous_chosen[0] % 2) / 2 + 4 * previous_chosen[1])])
+                                            draw_board()
+                                            draw_pieces(whiteCheckers.board, blackCheckers.board)
+                                            turn_end = True
+                                    elif return_button_rect.collidepoint(mouse_pos):
+                                        pass
+                                    else:
+                                        pass
+                                if being_moved:
+                                    for j in blackCheckers.captures(whiteCheckers).copy()[being_moved]:
+                                        capture = j[0:len(j) - 1][0]
+                                        previous_moves = j[-1:]
+                                    if capture == []:
+                                        previous_moves = []
+                                    if len(previous_moves) == 0:
+                                        previous_moves = blackCheckers.legal_moves(whiteCheckers).copy()[being_moved]
+                                    else:
+                                        capture_possible = True
+                                else:
+                                    pass
+                                previous_chosen = being_moved
+                                if turn_end:
+                                    capture = []
+                                    previous_moves = []
+                                    previous_chosen = -1
+                                    turn = (turn + 1) % 2
+                                    total_turns += 1
+                                    pers_score = ((total_turns - 1) * pers_score + value(whiteCheckers, blackCheckers)) / total_turns
+                                    turn_end = False
+                                    promote()
+                                    draw_board()
 
             if len([k for k in whiteCheckers.board if whiteCheckers.board[k] > 0]) == 0:
                 game_active = False
@@ -848,6 +975,7 @@ while running:
                     game_end = False
                     menu = True
                     bot = False
+                    player_color = -1
                     screen.fill(dark_green)
             pass
 
