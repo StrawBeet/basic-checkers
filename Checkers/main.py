@@ -25,13 +25,23 @@ previous_moves = []
 mouse_pos = pygame.mouse.get_pos()
 
 brown = (54, 35, 18)
+purple = (185, 28, 209)
+orange = (247, 98, 6)
+red = (255, 0, 0)
+cyan = (28, 237, 223)
 beige = (247, 232, 208)
 dark_green = (25, 120, 12)
 shaded = (0, 0, 0, 50)
 
 font = pygame.font.Font(None, 50)
 small_font = pygame.font.Font(None, 35)
+smaller_font = pygame.font.Font(None, 20)
 title_font = pygame.font.Font(None, 100)
+
+theme_surf = pygame.Surface((135, 108))
+theme_rect = theme_surf.get_rect(bottomright = screen.get_rect().bottomright)
+theme_text = smaller_font.render("Change Theme", True, 'White')
+theme_text_rect = theme_text.get_rect(center = theme_rect.center)
 
 local_mult_surf = pygame.Surface((360, 216))
 local_mult_rect = local_mult_surf.get_rect(center = (screen.get_rect().centerx, 282))
@@ -71,8 +81,12 @@ end_text = None
 title_text = title_font.render("Checkers", True, 'Black')
 title_rect = title_text.get_rect(center = (screen.get_rect().centerx, 100))
 
-player_text = None
-player_text_rect = None
+turn_surf = pygame.Surface((800, 40))
+turn_rect = turn_surf.get_rect(midbottom = (screen.get_rect().centerx, screen.get_rect().centery - 400))
+turn_w_text = small_font.render("White's Turn", True, 'White')
+turn_w_text_rect = turn_w_text.get_rect(midbottom = (screen.get_rect().centerx, screen.get_rect().centery - 400))
+turn_b_text = small_font.render("Black's Turn", True, 'White')
+turn_b_text_rect = turn_b_text.get_rect(midbottom = (screen.get_rect().centerx, screen.get_rect().centery - 400))
 
 help_text = small_font.render("Press S while capturing multiple pieces if you want to stop", True, 'Black')
 help_rect = help_text.get_rect(midbottom = screen.get_rect().midbottom)
@@ -723,6 +737,43 @@ while running:
             running = False
         if event.type == pygame.MOUSEMOTION:
             mouse_pos = pygame.mouse.get_pos()
+        if game_active:
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if theme_rect.collidepoint(mouse_pos):
+                    if brown == (54, 38, 18):
+                        brown = copy.deepcopy(purple)
+                    elif brown == purple:
+                        brown = copy.deepcopy(orange)
+                    elif brown == orange:
+                        brown = copy.deepcopy(red)
+                    elif brown == red:
+                        brown = copy.deepcopy(cyan)
+                    else:
+                        brown = (54, 38, 18)
+
+                    if player_color != 1:
+                        draw_board()
+                        if turn == 0:
+                            if len(previous_moves) > 0:
+                                draw_moves(whiteCheckers, blackCheckers, being_moved)
+                            else:
+                                pass
+                        elif not bot:
+                            if len(previous_moves) > 0:
+                                draw_moves(blackCheckers, whiteCheckers, being_moved)
+                            else:
+                                pass
+                        else:
+                            pass
+                    else:
+                        draw_board(True)
+                        if turn == 1:
+                            if len(previous_moves) > 0:
+                                draw_moves(blackCheckers, whiteCheckers, being_moved, True)
+                            else:
+                                pass
+                        else:
+                            pass
 
     if menu:
         # The code below draws and provides functionality to the main menu of the game
@@ -747,19 +798,15 @@ while running:
                 screen.fill(dark_green)
                 draw_board(player_color == 1)
                 screen.blit(return_button, return_button_rect)
-                if bot:
-                    if player_color == 0:
-                        player_text = small_font.render('You are Playing as White', True, 'Black')
-                        player_text_rect = player_text.get_rect(
-                            midbottom=(screen.get_rect().centerx, screen.get_rect().centery - 400))
-                        screen.blit(player_text, player_text_rect)
-                    else:
-                        player_text = small_font.render('You are Playing as Black', True, 'Black')
-                        player_text_rect = player_text.get_rect(
-                            midbottom=(screen.get_rect().centerx, screen.get_rect().centery - 400))
-                        screen.blit(player_text, player_text_rect)
+                screen.blit(return_button_text, return_button_text_rect)
+                screen.blit(theme_surf, theme_rect)
+                screen.blit(theme_text, theme_text_rect)
+                screen.blit(turn_surf, turn_rect)
+                screen.blit(turn_w_text, turn_w_text_rect)
+
     elif return_menu:
         screen.fill(shaded)
+        screen.blit(confirmation_text, confirmation_text_rect)
         screen.blit(return_surf, return_rect)
         screen.blit(return_text, return_text_rect)
         pygame.draw.rect(screen, 'White', return_outline, 5)
@@ -788,15 +835,14 @@ while running:
                 screen.fill(dark_green)
                 draw_board()
                 screen.blit(return_button, return_button_rect)
-                if bot:
-                    if player_color == 0:
-                        player_text = small_font.render('You are Playing as White', True, 'Black')
-                        player_text_rect = player_text.get_rect(midbottom = (screen.get_rect().centerx, screen.get_rect().centery - 400))
-                        screen.blit(player_text, player_text_rect)
-                    else:
-                        player_text = small_font.render('You are Playing as Black', True, 'Black')
-                        player_text_rect = player_text.get_rect(midbottom = (screen.get_rect().centerx, screen.get_rect().centery - 400))
-                        screen.blit(player_text, player_text_rect)
+                screen.blit(return_button_text, return_button_rect)
+                screen.blit(theme_surf, theme_rect)
+                screen.blit(theme_text, theme_text_rect)
+                screen.blit(turn_surf, turn_rect)
+                if turn % 2 == 0:
+                    screen.blit(turn_w_text, turn_w_text_rect)
+                else:
+                    screen.blit(turn_b_text, turn_b_text_rect)
 
     else:
         if game_active:
@@ -804,6 +850,7 @@ while running:
             if pygame.mouse.get_pressed()[0]:
                 if return_button_rect.collidepoint(mouse_pos):
                     return_menu = True
+
                 if player_color != 1:
                     for i in range(32):
                         # Checks whether the mouse collides with where a piece could be. There cannot be any pieces on the white squares
@@ -886,6 +933,8 @@ while running:
                                 turn_end = False
                                 promote()
                                 draw_board()
+                                screen.blit(turn_surf, turn_rect)
+                                screen.blit(turn_b_text, turn_b_text_rect)
                     else:
 
                         if pygame.mouse.get_pressed()[0]:
@@ -926,6 +975,8 @@ while running:
                                 turn_end = False
                                 promote()
                                 draw_board()
+                                screen.blit(turn_surf, turn_rect)
+                                screen.blit(turn_w_text, turn_w_text_rect)
 
                 else:
                     if player_color == 0:
@@ -1004,6 +1055,8 @@ while running:
                             draw_board(True)
                             turn = (turn + 1) % 2
                         else:
+                            screen.blit(turn_surf, turn_rect)
+                            screen.blit(turn_b_text, turn_b_text_rect)
                             if pygame.mouse.get_pressed()[0]:
                                 for k in previous_moves:
                                     if black_rects[31 - int((k[0] - k[0] % 2) / 2 + 4 * k[1])].scale_by(0.7).collidepoint(
