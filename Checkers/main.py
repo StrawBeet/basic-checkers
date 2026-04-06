@@ -10,7 +10,7 @@ running = True
 menu = True
 game_active = False
 bot = False
-settings = False
+return_menu = False
 turn = 0
 turn_end = False
 game_end = False
@@ -40,10 +40,20 @@ bot_text = font.render("Play Against a Bot", True, 'White')
 bot_text_rect = bot_text.get_rect(center = bot_rect.center)
 bot_surf.fill('black')
 
-return_surf = pygame.Surface((135, 108))
-return_rect = return_surf.get_rect(center = (screen.get_rect().centerx, screen.get_rect().centery + 330))
+return_surf = pygame.Surface((305, 324))
+return_rect = return_surf.get_rect(center = (screen.get_rect().centerx - 200, screen.get_rect().centery + 330))
 return_text = font.render("Return to Menu", True, 'White')
 return_text_rect = return_text.get_rect(center = return_rect.center)
+return_outline = pygame.Rect(return_rect.topleft[0], return_rect.topleft[1], 305, 324)
+
+continue_surf = pygame.Surface((305, 324))
+continue_rect = continue_surf.get_rect(center = (screen.get_rect().centerx + 200, screen.get_rect().centery + 330))
+continue_text = font.render("Continue Playing", True, 'White')
+continue_text_rect = continue_text.get_rect(center = continue_rect.center)
+continue_outline = pygame.Rect(continue_rect.topleft[0], continue_rect.topleft[1], 305, 324)
+
+return_button = pygame.Surface((135, 108))
+return_button_rect = return_button.get_rect(topleft = (0,0))
 
 end_surf = pygame.Surface((540, 432))
 end_rect = end_surf.get_rect(center = screen.get_rect().center)
@@ -481,7 +491,7 @@ def bot_capture(color1, color2, moved, captured, move_to):
     color1.board[move_to] = color1.board[moved]
     color2.board[captured] = 0
     color1.board[moved] = 0
-    return
+    return color1, color2
 
 def best_move(color1, color2):
     current_value = value(color1, color2)
@@ -500,7 +510,7 @@ def best_move(color1, color2):
         if len(moves) > 0:
             for i in moves:
                 for k in start_color1.legal_moves(color2)[i]:
-                    test_color1 = move(start_color1, i, k)
+                    test_color1 = bot_move(start_color1, i, k)
                     moves2 = [j for j in start_color2.captures(start_color1) if len(start_color2.legal_moves(start_color1)[j]) > 0]
                     if len(moves2) > 0:
                         pass
@@ -508,7 +518,10 @@ def best_move(color1, color2):
                         if value(test_color1, test_color2) == value(best_color1, best_color2):
                             best.append([[i, k]])
                         else:
-                            pass
+                            if len(best) == 0:
+                                best = [[i, k]]
+                                best_color1 = copy.deepcopy(test_color1)
+                                best_color2 = copy.deepcopy(test_color2)
                 test_color1 = copy.deepcopy(start_color1)
                 test_color2 = copy.deepcopy(start_color2)
         else:
@@ -516,33 +529,39 @@ def best_move(color1, color2):
     else:
         for i in moves:
             for k in start_color1.captures(start_color2)[i]:
-                test_color1, test_color2 = test_color1.captures(start_color1, start_color2, i, k[0], k[1])
-                current_moves = [j for j in test_color1.captures(test_color2) if len(test_color1.captues(test_color2)[j]) > 0]
+                test_color1, test_color2 = bot_capture(start_color1, start_color2, i, k[0], k[1])
+                current_moves = [j for j in test_color1.captures(test_color2) if len(test_color1.captures(test_color2)[j]) > 0]
                 if len(current_moves) > 0:
                     for j in current_moves:
                         for l in test_color1.captures(test_color2)[j]:
-                            checking_color1, checking_color2 = captures(test_color1, test_color2, j, l[0], l[1])
+                            checking_color1, checking_color2 = bot_capture(test_color1, test_color2, j, l[0], l[1])
                             if value(checking_color1, checking_color2) > value(best_color1, best_color2):
                                 best = [[i,j, [k, l]]]
                                 best_color1 = copy.deepcopy(checking_color1)
                                 best_color2 = copy.deepcopy(checking_color2)
-                            elif value(checking_color1, checking_color2) > value(best_color1, best_color2):
+                            elif value(checking_color1, checking_color2) == value(best_color1, best_color2):
                                 best.append([i, j, [k, l]])
 
                             else:
-                                pass
+                                if len(best) == 0:
+                                    best = [[i, j, [k, l]]]
+                                    best_color1 = copy.deepcopy(checking_color1)
+                                    best_color2 = copy.deepcopy(checking_color2)
                 else:
                     current_moves = [j for j in test_color2.captures(test_color1) if len(test_color2.captures(test_color1)[j]) > 0]
                     if len(current_moves) > 0:
                         for j in current_moves:
                             for l in test_color2.captures(test_color1)[j]:
-                                checking_color1, checking_color2 = captures(test_color1, test_color2, j, l[0], l[1])
+                                checking_color1, checking_color2 = bot_capture(test_color1, test_color2, j, l[0], l[1])
                                 if value(checking_color1, checking_color2) > value(checking_color1, checking_color2):
                                     best = [[i, [k]]]
                                 elif value(checking_color1, checking_color2) == value(best_color1, best_color2):
                                     best.append([i, [k]])
                                 else:
-                                    pass
+                                    if len(best) == 0:
+                                        best = [[i, [k]]]
+                                        best_color1 = copy.deepcopy(checking_color1)
+                                        best_color2 = copy.deepcopy(checking_color2)
                     else:
                         if value(test_color1, test_color2) > value(best_color1, best_color2):
                             best = [[i, [k]]]
@@ -550,17 +569,29 @@ def best_move(color1, color2):
                             best_color2 = copy.deepcopy(test_color2)
                         elif value(test_color1, test_color2) == value(best_color1, best_color2):
                             best.append([i, [k]])
-
+                        else:
+                            if len(best) == 0:
+                                best = [[i, [k]]]
+                                best_color1 = copy.deepcopy(test_color1)
+                                best_color2 = copy.deepcopy(test_color2)
     if len(best) > 0:
         n = randint(0, len(best) - 1)
         return best[n]
     else:
         best = [i for i in best_color1.legal_moves(best_color2) if best_color1.legal_moves(best_color2)[i] != []]
-        choose = best_color1.legal_moves(best_color2)[best[randint(0, len(best) - 1)]]
-        if len(choose) == 1:
-            return [[best[best.index(choose)], choose[0]]]
+        n = randint(0, len(best) - 1)
+        choose = best_color1.legal_moves(best_color2).copy()[best[n]]
+        try: best[n]
+        except ValueError:
+            print(best)
+            print(choose)
+            print(n)
+            exit()
         else:
-            return [[best[best.index(choose)], choose[randint(0, len(choose) - 1)]]]
+            if len(choose) == 1:
+                return [[best[n], choose[0]]]
+            else:
+                return [[best[n], choose[randint(0, len(choose) - 1)]]]
 
 
 
@@ -603,8 +634,10 @@ while running:
                 game_active = True
                 bot = True
 
-            screen.fill(dark_green)
-            draw_board()
+            if not menu:
+                screen.fill(dark_green)
+                draw_board()
+                pygame.draw.rect(screen, 'Black', return_button_rect)
 
     else:
         if game_active:
@@ -686,6 +719,8 @@ while running:
                                         draw_board()
                                         draw_pieces(whiteCheckers.board, blackCheckers.board)
                                         turn_end = True
+                                elif return_button_rect.collidepoint(mouse_pos):
+                                    pass
                                 else:
                                     pass
                             if being_moved:
@@ -806,12 +841,14 @@ while running:
                 screen.blit(end_text, end_text_rect)
                 screen.blit(return_surf, return_rect)
                 screen.blit(return_text, return_text_rect)
+                pygame.draw.rect(screen, 'White', return_outline, 5)
         elif game_end:
-            #if return_rect.collidepoint(mouse_pos):
-             #   game_end = False
-              #  menu = True
-               # bot = False
-                #screen.fill(dark_green)
+            if pygame.mouse.get_pressed()[0]:
+                if return_rect.collidepoint(mouse_pos):
+                    game_end = False
+                    menu = True
+                    bot = False
+                    screen.fill(dark_green)
             pass
 
 
