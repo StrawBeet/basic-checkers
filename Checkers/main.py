@@ -15,6 +15,8 @@ turn = 0
 turn_end = False
 game_end = False
 
+move_sfx = pygame.mixer.music.load('sfx/piece_moving.wav')
+
 player_color = 0
 previous_chosen = -1
 being_moved = 0
@@ -43,13 +45,13 @@ bot_text_rect = bot_text.get_rect(center = bot_rect.center)
 bot_surf.fill('black')
 
 return_surf = pygame.Surface((305, 216))
-return_rect = return_surf.get_rect(center = (screen.get_rect().centerx - 275, screen.get_rect().centery + 330))
+return_rect = return_surf.get_rect(center = (screen.get_rect().centerx - 275, screen.get_rect().centery + 300))
 return_text = font.render("Return to Menu", True, 'White')
 return_text_rect = return_text.get_rect(center = return_rect.center)
 return_outline = pygame.Rect(return_rect.topleft[0], return_rect.topleft[1], 305, 216)
 
 continue_surf = pygame.Surface((305, 216))
-continue_rect = continue_surf.get_rect(center = (screen.get_rect().centerx + 275, screen.get_rect().centery + 330))
+continue_rect = continue_surf.get_rect(center = (screen.get_rect().centerx + 275, screen.get_rect().centery + 300))
 continue_text = font.render("Continue Playing", True, 'White')
 continue_text_rect = continue_text.get_rect(center = continue_rect.center)
 continue_outline = pygame.Rect(continue_rect.topleft[0], continue_rect.topleft[1], 305, 216)
@@ -74,8 +76,8 @@ white_rects = []
 black_rects = []
 
 score_surf = pygame.Surface((440, 216))
-w_score_rect = score_surf.get_rect(center = (screen.get_rect().centerx - 275, screen.get_rect().centery - 330))
-b_score_rect = score_surf.get_rect(center = (screen.get_rect().centerx + 275, screen.get_rect().centery - 330))
+w_score_rect = score_surf.get_rect(center = (screen.get_rect().centerx - 275, screen.get_rect().centery - 300))
+b_score_rect = score_surf.get_rect(center = (screen.get_rect().centerx + 275, screen.get_rect().centery - 300))
 w_score_text = font.render('White\'s Score:', True, 'White')
 w_score_text_rect = w_score_text.get_rect(midtop = w_score_rect.midtop)
 b_score_text = font.render('Black\'s Score:', True, 'White')
@@ -444,6 +446,7 @@ def move(color, moved, move_to):
     """Moved indicated the piece moved while move indicates where it moves to"""
     color.board[move_to] = color.board[moved]
     color.board[moved] = 0
+    pygame.mixer.music.play(loops=0, start=0.0, fade_ms=0)
     return color
 
 def captures(color1, color2, moved, captured, move_to):
@@ -454,7 +457,7 @@ def captures(color1, color2, moved, captured, move_to):
     color2.board[captured] = 0
     color1.board[move_to] = color1.board[moved]
     color1.board[moved] = 0
-
+    pygame.mixer.music.play(loops=0, start=0.0, fade_ms=0)
     possibilities = color1.captures(color2)[move_to]
     previous = move_to
 
@@ -487,11 +490,11 @@ def captures(color1, color2, moved, captured, move_to):
             for i in range(32):
                 for k in possibilities:
                     if black_rects[int((k[1][0] - k[1][0] % 2) / 2 + 4 * k[1][1])].scale_by(0.7).collidepoint(mouse_pos):
-                        print("Moved")
                         color2.board[k[0]] = 0
                         color1.board[k[1]] = color1.board[previous]
                         color1.board[previous] = 0
                         previous = k[1]
+                        pygame.mixer.music.play(loops=0, start=0.0, fade_ms=0)
                         draw_board()
                         possibilities = color1.captures(color2)[previous]
 
@@ -628,19 +631,6 @@ while running:
             running = False
         if event.type == pygame.MOUSEMOTION:
             mouse_pos = pygame.mouse.get_pos()
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_k:
-                print("White board:", whiteCheckers.board)
-                print("White moves:", whiteCheckers.legal_moves(blackCheckers))
-                print("White captures:", whiteCheckers.captures(blackCheckers))
-                print("Black board:", blackCheckers.board)
-                print("Black moves:", blackCheckers.legal_moves(whiteCheckers))
-                print("Black captures:", blackCheckers.captures(whiteCheckers))
-                print("Previous moves:", previous_moves)
-                print("Previous chosen:", previous_chosen)
-                print("Captures:", capture)
-                print("Being moved:", being_moved)
-
 
     if menu:
         # The code below draws and provides functionality to the main menu of the game
@@ -660,19 +650,23 @@ while running:
                 game_active = True
                 bot = True
                 player_color = randint(0, 2)
-                if player_color == 0:
-                    player_text = font.render('You are Playing as White', True, 'Black')
-                    player_text_rect = player_text.get_rect(midtop = screen.get_rect().midtop)
-                    screen.blit(player_text, player_text_rect)
-                else:
-                    player_text = font.render('You are Playing as Black', True, 'Black')
-                    player_text_rect = player_text.get_rect(midtop = screen.get_rect().midtop)
-                    screen.blit(player_text, player_text_rect)
+                print(player_color, randint(0,2))
 
             if not menu:
                 screen.fill(dark_green)
                 draw_board()
                 screen.blit(return_button, return_button_rect)
+                if bot:
+                    if player_color == 0:
+                        player_text = small_font.render('You are Playing as White', True, 'Black')
+                        player_text_rect = player_text.get_rect(
+                            midbottom=(screen.get_rect().centerx, screen.get_rect().centery - 400))
+                        screen.blit(player_text, player_text_rect)
+                    else:
+                        player_text = small_font.render('You are Playing as Black', True, 'Black')
+                        player_text_rect = player_text.get_rect(
+                            midbottom=(screen.get_rect().centerx, screen.get_rect().centery - 400))
+                        screen.blit(player_text, player_text_rect)
     elif return_menu:
         screen.fill(shaded)
         screen.blit(return_surf, return_rect)
@@ -683,7 +677,6 @@ while running:
         pygame.draw.rect(screen, 'White', continue_outline, 5)
         if pygame.mouse.get_pressed()[0]:
             if return_rect.collidepoint(mouse_pos):
-                print("Returning to main menu")
                 menu = True
                 game_active = False
                 bot = False
@@ -700,19 +693,18 @@ while running:
                 pers_score = 0
                 total_turns = 0
             elif continue_rect.collidepoint(mouse_pos):
-                print("Returning to game")
                 return_menu = False
                 screen.fill(dark_green)
                 draw_board()
                 screen.blit(return_button, return_button_rect)
                 if bot:
                     if player_color == 0:
-                        player_text = font.render('You are Playing as White', True, 'Black')
-                        player_text_rect = player_text.get_rect(midtop = screen.get_rect().midtop)
+                        player_text = small_font.render('You are Playing as White', True, 'Black')
+                        player_text_rect = player_text.get_rect(midbottom = (screen.get_rect().centerx, screen.get_rect().centery - 400))
                         screen.blit(player_text, player_text_rect)
                     else:
-                        player_text = font.render('You are Playing as Black', True, 'Black')
-                        player_text_rect = player_text.get_rect(midtop = screen.get_rect().midtop)
+                        player_text = small_font.render('You are Playing as Black', True, 'Black')
+                        player_text_rect = player_text.get_rect(midbottom = (screen.get_rect().centerx, screen.get_rect().centery - 400))
                         screen.blit(player_text, player_text_rect)
 
     else:
@@ -827,7 +819,6 @@ while running:
 
                 else:
                     if player_color == 0:
-                        print("You are playing as white")
                         if turn % 2 == 0:
                             if pygame.mouse.get_pressed()[0]:
                                 for k in previous_moves:
@@ -859,7 +850,6 @@ while running:
                                     pass
                                 previous_chosen = being_moved
                                 if turn_end:
-                                    print("Turn end")
                                     capture = []
                                     previous_moves = []
                                     previous_chosen = -1
@@ -871,6 +861,7 @@ while running:
                                     draw_board()
                         else:
                             chosen = best_move(blackCheckers, whiteCheckers)
+                            pygame.mixer.music.play(loops=0, start=0.0, fade_ms=0)
                             if len(chosen) > 0:
                                 if len(chosen) == 3:
                                     blackCheckers, whiteCheckers = bot_capture(blackCheckers, whiteCheckers, chosen[0], chosen[2][0][0], chosen[2][0][1])
@@ -886,16 +877,22 @@ while running:
                             draw_board()
                             turn = (turn + 1) % 2
                     else:
-                        print("You are playing as black")
                         if turn % 2 == 0:
                             chosen = best_move(whiteCheckers, blackCheckers)
-                            if len(chosen) == 3:
-                                whiteCheckers, blackCheckers = bot_capture(whiteCheckers, blackCheckers, chosen[0], chosen[2][0][0], chosen[2][0][1])
-                                whiteCheckers, blackCheckers = bot_capture(whiteCheckers, blackCheckers, chosen[1], chosen[2][1][0], chosen[2][1][1])
-                            elif len(chosen) == 2:
-                                whiteCheckers, blackCheckers = bot_capture(whiteCheckers, blackCheckers, chosen[0], chosen[1][0][0], chosen[1][0][1])
+                            pygame.mixer.music.play(loops=0, start=0.0, fade_ms=0)
+                            if len(chosen) > 0:
+                                if len(chosen) == 3:
+                                    whiteCheckers, blackCheckers = bot_capture(whiteCheckers, blackCheckers, chosen[0], chosen[2][0][0], chosen[2][0][1])
+                                    whiteCheckers, blackCheckers = bot_capture(whiteCheckers, blackCheckers, chosen[1], chosen[2][1][0], chosen[2][1][1])
+                                elif len(chosen) == 2:
+                                    whiteCheckers, blackCheckers = bot_capture(whiteCheckers, blackCheckers, chosen[0], chosen[1][0][0], chosen[1][0][1])
+                                else:
+                                    whiteCheckers = move(whiteCheckers, chosen[0][0], chosen[0][1])
                             else:
-                                whiteCheckers = move(whiteCheckers, chosen[0][0], chosen[0][1])
+                                pass
+                            promote()
+                            draw_board()
+                            turn = (turn + 1) % 2
                         else:
                             if pygame.mouse.get_pressed()[0]:
                                 for k in previous_moves:
@@ -934,6 +931,7 @@ while running:
                                     previous_moves = []
                                     previous_chosen = -1
                                     turn = (turn + 1) % 2
+                                    total_turns += 1
                                     black_score = ((total_turns - 1) * black_score + value(whiteCheckers,
                                                                                            blackCheckers)) / total_turns
                                     turn_end = False
@@ -964,7 +962,6 @@ while running:
                 end_text_rect = end_text.get_rect(center = screen.get_rect().center)
 
             if game_end:
-                print("Game ended")
                 whiteCheckers.board = copy.deepcopy(white_board)
                 blackCheckers.board = copy.deepcopy(black_board)
                 capture = []
@@ -980,10 +977,10 @@ while running:
                 screen.blit(return_text, return_text_rect)
                 pygame.draw.rect(screen, 'White', return_outline, 5)
 
-                pygame.draw.circle(screen, 'Yellow', w_star_pos[0], 50)
                 if bot:
                     screen.blit(score_surf, w_score_rect)
                     screen.blit(pers_score_text, pers_score_rect)
+                    pygame.draw.circle(screen, 'Yellow', w_star_pos[0], 50)
                     if pers_score > 0.75:
                         pygame.draw.circle(screen, 'Yellow', w_star_pos[1], 50)
                         pygame.draw.circle(screen, 'Yellow', w_star_pos[2], 50)
@@ -994,6 +991,11 @@ while running:
                         pygame.draw.circle(screen, 'White', w_star_pos[1], 50, 5)
                         pygame.draw.circle(screen, 'White', w_star_pos[2], 50, 5)
                 else:
+                    screen.blit(score_surf, w_score_rect)
+                    screen.blit(w_score_text, w_score_text_rect)
+                    screen.blit(score_surf, b_score_rect)
+                    screen.blit(b_score_text, b_score_text_rect)
+                    pygame.draw.circle(screen, 'Yellow', w_star_pos[0], 50)
                     pygame.draw.circle(screen, 'Yellow', b_star_pos[0], 50)
                     if white_score > 0.75:
                         pygame.draw.circle(screen, 'Yellow', w_star_pos[1], 50)
