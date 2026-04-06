@@ -4,6 +4,7 @@ from random import randint
 import copy
 
 pygame.init()
+
 screen = pygame.display.set_mode((1080, 864))
 clock = pygame.time.Clock()
 menu = True
@@ -57,6 +58,11 @@ continue_outline = pygame.Rect(continue_rect.topleft[0], continue_rect.topleft[1
 
 return_button = pygame.Surface((135, 108))
 return_button_rect = return_button.get_rect(topleft = (0,0))
+return_button_text = font.render("Return", True, 'White')
+return_button_text_rect = return_button_text.get_rect(center = return_button_rect.center)
+
+confirmation_text = title_font.render("Are You Sure?", True, 'White')
+confirmation_text_rect = confirmation_text.get_rect(center = screen.get_rect().center)
 
 end_surf = pygame.Surface((540, 432))
 end_rect = end_surf.get_rect(center = screen.get_rect().center)
@@ -466,7 +472,7 @@ def draw_moves(white, black, square, reversed=False):
                 for i in moves:
                     pygame.draw.circle(screen, (0, 0, 255, 180), (190 + 100 * (7 - i[1][0]),
                                                                   782 - 100 * (7 - i[1][1])), 20)
-                    pygame.draw.circle(screen, 'White', (190 + 100 * i[1][0],
+                    pygame.draw.circle(screen, 'White', (190 + 100 * (7 - i[1][0]),
                                                          782 - 100 * (7 - i[1][1])), 20,
                                        1)
         elif white.board[square] == 3:
@@ -573,7 +579,7 @@ def captures(color1, color2, moved, captured, move_to, reversed=False):
             if pygame.mouse.get_pressed()[0]:
                 for i in range(32):
                     for k in possibilities:
-                        if black_rects[int((k[1][0] - k[1][0] % 2) / 2 + 4 * k[1][1])].scale_by(0.7).collidepoint(
+                        if black_rects[31 - int((k[1][0] - k[1][0] % 2) / 2 + 4 * k[1][1])].scale_by(0.7).collidepoint(
                                 mouse_pos):
                             color2.board[k[0]] = 0
                             color1.board[k[1]] = color1.board[previous]
@@ -828,7 +834,7 @@ while running:
                             else:
                                 being_moved = ((i % 4) * 2 + 1, i // 4)
                             for k in previous_moves:
-                                if (7 - k[1]) % 2 == 0:
+                                if k[1] % 2 == 0:
                                     pygame.draw.rect(screen, brown, black_rects[31 - int((k[0] / 2) + 4 * k[1])])
                                 else:
                                     pygame.draw.rect(screen, brown, black_rects[31 - int((k[0] - 1) / 2 + 4 * k[1])])
@@ -852,7 +858,6 @@ while running:
                                         capture = []
                                     else:
                                         whiteCheckers = move(whiteCheckers, previous_chosen, k)
-                                        #pygame.draw.rect(screen, brown, black_rects[int((previous_chosen[0] - previous_chosen[0] % 2) / 2 + 4 * previous_chosen[1])])
                                         draw_board()
                                         draw_pieces(whiteCheckers.board, blackCheckers.board)
                                         turn_end = True
@@ -892,7 +897,6 @@ while running:
                                         capture = []
                                     else:
                                         blackCheckers = move(blackCheckers, previous_chosen, k)
-                                        #pygame.draw.rect(screen, brown, black_rects[int((previous_chosen[0] - previous_chosen[0] % 2) / 2 + 4 * previous_chosen[1])])
                                         draw_board()
                                         draw_pieces(whiteCheckers.board, blackCheckers.board)
                                         turn_end = True
@@ -1143,6 +1147,5 @@ while running:
 
     pygame.display.flip()
     clock.tick(60)
-
 
 pygame.quit()
