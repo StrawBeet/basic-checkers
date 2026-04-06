@@ -6,6 +6,8 @@ import copy
 pygame.init()
 
 screen = pygame.display.set_mode((1080, 864))
+pygame.display.set_caption("Checkers")
+
 clock = pygame.time.Clock()
 menu = True
 game_active = False
