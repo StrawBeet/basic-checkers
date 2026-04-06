@@ -28,6 +28,7 @@ dark_green = (25, 120, 12)
 shaded = (0, 0, 0, 50)
 
 font = pygame.font.Font(None, 50)
+small_font = pygame.font.Font(None, 35)
 title_font = pygame.font.Font(None, 100)
 
 local_mult_surf = pygame.Surface((360, 216))
@@ -66,18 +67,24 @@ title_rect = title_text.get_rect(center = (screen.get_rect().centerx, 100))
 player_text = None
 player_text_rect = None
 
-help_text = title_font.render("Press S while capturing multiple pieces if you want to stop")
-help_rect = help_text.get_rect(bottom = screen.get_rect().midbottom)
+help_text = small_font.render("Press S while capturing multiple pieces if you want to stop", True, 'Black')
+help_rect = help_text.get_rect(midbottom = screen.get_rect().midbottom)
 
 white_rects = []
 black_rects = []
 
-score_surf = pygame.Surface((305, 216))
+score_surf = pygame.Surface((440, 216))
 w_score_rect = score_surf.get_rect(center = (screen.get_rect().centerx - 275, screen.get_rect().centery - 330))
 b_score_rect = score_surf.get_rect(center = (screen.get_rect().centerx + 275, screen.get_rect().centery - 330))
 w_score_text = font.render('White\'s Score:', True, 'White')
+w_score_text_rect = w_score_text.get_rect(midtop = w_score_rect.midtop)
 b_score_text = font.render('Black\'s Score:', True, 'White')
+b_score_text_rect = b_score_text.get_rect(midtop = b_score_rect.midtop)
 pers_score_text = font.render('Your Score:', True, 'White')
+pers_score_rect = pers_score_text.get_rect(midtop = w_score_rect.midtop)
+
+w_star_pos = [(w_score_rect.centerx - 150, w_score_rect.centery + 25), (w_score_rect.centerx, w_score_rect.centery + 35), (w_score_rect.centerx + 150, w_score_rect.centery + 35)]
+b_star_pos = [(b_score_rect.centerx - 150, b_score_rect.centery + 25), (b_score_rect.centerx, b_score_rect.centery + 35), (b_score_rect.centerx + 150, b_score_rect.centery + 35)]
 
 pers_score = 0
 white_score = 0
@@ -777,6 +784,7 @@ while running:
                                 promote()
                                 draw_board()
                     else:
+
                         if pygame.mouse.get_pressed()[0]:
                             for k in previous_moves:
                                 if black_rects[int((k[0] - k[0] % 2) / 2 + 4 * k[1])].scale_by(0.7).collidepoint(mouse_pos):
@@ -819,6 +827,7 @@ while running:
 
                 else:
                     if player_color == 0:
+                        print("You are playing as white")
                         if turn % 2 == 0:
                             if pygame.mouse.get_pressed()[0]:
                                 for k in previous_moves:
@@ -877,6 +886,7 @@ while running:
                             draw_board()
                             turn = (turn + 1) % 2
                     else:
+                        print("You are playing as black")
                         if turn % 2 == 0:
                             chosen = best_move(whiteCheckers, blackCheckers)
                             if len(chosen) == 3:
@@ -924,8 +934,8 @@ while running:
                                     previous_moves = []
                                     previous_chosen = -1
                                     turn = (turn + 1) % 2
-                                    total_turns += 1
-                                    pers_score = ((total_turns - 1) * pers_score + value(whiteCheckers, blackCheckers)) / total_turns
+                                    black_score = ((total_turns - 1) * black_score + value(whiteCheckers,
+                                                                                           blackCheckers)) / total_turns
                                     turn_end = False
                                     promote()
                                     draw_board()
@@ -955,8 +965,8 @@ while running:
 
             if game_end:
                 print("Game ended")
-                whiteCheckers.board = white_board
-                blackCheckers.board = black_board
+                whiteCheckers.board = copy.deepcopy(white_board)
+                blackCheckers.board = copy.deepcopy(black_board)
                 capture = []
                 previous_moves = []
                 previous_chosen = -1
@@ -969,7 +979,46 @@ while running:
                 screen.blit(return_surf, return_rect)
                 screen.blit(return_text, return_text_rect)
                 pygame.draw.rect(screen, 'White', return_outline, 5)
+
+                pygame.draw.circle(screen, 'Yellow', w_star_pos[0], 50)
+                if bot:
+                    screen.blit(score_surf, w_score_rect)
+                    screen.blit(pers_score_text, pers_score_rect)
+                    if pers_score > 0.75:
+                        pygame.draw.circle(screen, 'Yellow', w_star_pos[1], 50)
+                        pygame.draw.circle(screen, 'Yellow', w_star_pos[2], 50)
+                    elif pers_score > -0.5:
+                        pygame.draw.circle(screen, 'Yellow', w_star_pos[1], 50)
+                        pygame.draw.circle(screen, 'White', w_star_pos[2], 50, 5)
+                    else:
+                        pygame.draw.circle(screen, 'White', w_star_pos[1], 50, 5)
+                        pygame.draw.circle(screen, 'White', w_star_pos[2], 50, 5)
+                else:
+                    pygame.draw.circle(screen, 'Yellow', b_star_pos[0], 50)
+                    if white_score > 0.75:
+                        pygame.draw.circle(screen, 'Yellow', w_star_pos[1], 50)
+                        pygame.draw.circle(screen, 'Yellow', w_star_pos[2], 50)
+                    elif white_score > -0.5:
+                        pygame.draw.circle(screen, 'Yellow', w_star_pos[1], 50)
+                        pygame.draw.circle(screen, 'White', w_star_pos[2], 50, 5)
+                    else:
+                        pygame.draw.circle(screen, 'White', w_star_pos[1], 50, 5)
+                        pygame.draw.circle(screen, 'White', w_star_pos[1], 50, 5)
+
+                    if black_score > 0.75:
+                        pygame.draw.circle(screen, 'Yellow', b_star_pos[1], 50)
+                        pygame.draw.circle(screen, 'Yellow', b_star_pos[2], 50)
+                    elif black_score > -0.5:
+                        pygame.draw.circle(screen, 'Yellow', b_star_pos[1], 50)
+                        pygame.draw.circle(screen, 'White', b_star_pos[2], 50, 5)
+                    else:
+                        pygame.draw.circle(screen, 'White', b_star_pos[1], 50, 5)
+                        pygame.draw.circle(screen, 'White', b_star_pos[2], 50, 5)
+
         elif game_end:
+            white_score = 0
+            black_score = 0
+            pers_score = 0
             if pygame.mouse.get_pressed()[0]:
                 if return_rect.collidepoint(mouse_pos):
                     game_end = False
