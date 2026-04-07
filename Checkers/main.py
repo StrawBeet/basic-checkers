@@ -984,7 +984,7 @@ while running:
                                 previous_moves = []
                                 previous_chosen = -1
                                 turn = (turn + 1) % 2
-                                black_score = ((total_turns - 1) * black_score + value(whiteCheckers, blackCheckers)) / total_turns
+                                black_score = ((total_turns - 1) * black_score + value(blackCheckers, whiteCheckers)) / total_turns
                                 turn_end = False
                                 promote()
                                 draw_board()
@@ -1108,8 +1108,8 @@ while running:
                                     previous_chosen = -1
                                     turn = (turn + 1) % 2
                                     total_turns += 1
-                                    black_score = ((total_turns - 1) * black_score + value(whiteCheckers,
-                                                                                           blackCheckers)) / total_turns
+                                    black_score = ((total_turns - 1) * black_score + value(blackCheckers,
+                                                                                           whiteCheckers)) / total_turns
                                     turn_end = False
                                     promote()
                                     draw_board(True)
@@ -1181,7 +1181,7 @@ while running:
                         pygame.draw.circle(screen, 'White', w_star_pos[2], 50, 5)
                     else:
                         pygame.draw.circle(screen, 'White', w_star_pos[1], 50, 5)
-                        pygame.draw.circle(screen, 'White', w_star_pos[1], 50, 5)
+                        pygame.draw.circle(screen, 'White', w_star_pos[2], 50, 5)
 
                     if black_score > 0.75:
                         pygame.draw.circle(screen, 'Yellow', b_star_pos[1], 50)
