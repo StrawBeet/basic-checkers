@@ -2,6 +2,8 @@ import pygame
 from sys import exit
 from random import randint
 import copy
+import sys
+import os
 
 pygame.init()
 
@@ -17,7 +19,16 @@ turn = 0
 turn_end = False
 game_end = False
 
-pygame.mixer.music.load('sfx/piece_moving.ogg')
+# Note that the function below and the definition of music_path was generated using AI
+def get_resource_path(relative_path):
+    try:
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
+
+music_path = get_resource_path(os.path.join("sfx", "piece_moving.ogg"))
+pygame.mixer.music.load(music_path)
 
 player_color = 0
 previous_chosen = -1
