@@ -538,10 +538,10 @@ async def main():
         pygame.mixer.music.play(loops=0, start=0.0, fade_ms=0)
         return color
 
-    async def captures(color1, color2, moved, captured, move_to, reversed=False):
-        global mouse_pos
+    async def captures(color1, color2, moved, captured, move_to, mouse_pos, reversed=False):
         """Moved indicates the piece moved, captures is a list indicating all the captured pieces, move_to indicates
         where the piece moves, color1 represents the color whose turn it is and color2 represents the other player"""
+
         capturing = True
         color2.board[captured] = 0
         color1.board[move_to] = color1.board[moved]
@@ -561,6 +561,8 @@ async def main():
                 draw_pieces(color1.board, color2.board)
             else:
                 draw_pieces(color2.board, color1.board)
+            displayed_image = pygame.transform.scale(screen, real_screen.get_size())
+            real_screen.blit(displayed_image)
             pygame.display.flip()
             while capturing:
                 await asyncio.sleep(0)
@@ -575,6 +577,8 @@ async def main():
                 if len(possibilities) == 0 or not capturing:
                     break
                 draw_moves(color1, color2, previous)
+                displayed_image = pygame.transform.scale(screen, real_screen.get_size())
+                real_screen.blit(displayed_image)
                 pygame.display.flip()
                 if pygame.mouse.get_pressed()[0]:
                     for i in range(32):
@@ -595,7 +599,10 @@ async def main():
                 draw_pieces(color1.board, color2.board, reversed)
             else:
                 draw_pieces(color2.board, color1.board, reversed)
+            displayed_image = pygame.transform.scale(screen, real_screen.get_size())
+            real_screen.blit(displayed_image)
             pygame.display.flip()
+
             while capturing:
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
@@ -757,6 +764,7 @@ async def main():
             if event.type == pygame.QUIT:
                 running = False
             if event.type == pygame.MOUSEMOTION:
+                print("Mouse moved")
                 mouse_pos = pygame.mouse.get_pos()
             if event.type == pygame.VIDEORESIZE:
                 real_screen = pygame.display.set_mode((1080, 864), pygame.RESIZABLE)
@@ -923,7 +931,7 @@ async def main():
                                 for k in previous_moves:
                                     if black_rects[int((k[0] - k[0] % 2) / 2 + 4 * k[1])].scale_by(0.7).collidepoint(mouse_pos):
                                         if capture:
-                                            whiteCheckers, blackCheckers = await captures(whiteCheckers, blackCheckers, previous_chosen, capture, k)
+                                            whiteCheckers, blackCheckers = await captures(whiteCheckers, blackCheckers, previous_chosen, capture, k, mouse_pos)
                                             turn_end = True
                                             capture = []
                                         else:
@@ -964,7 +972,7 @@ async def main():
                                 for k in previous_moves:
                                     if black_rects[int((k[0] - k[0] % 2) / 2 + 4 * k[1])].scale_by(0.7).collidepoint(mouse_pos):
                                         if capture:
-                                            blackCheckers, whiteCheckers = await captures(blackCheckers, whiteCheckers, previous_chosen, capture, k)
+                                            blackCheckers, whiteCheckers = await captures(blackCheckers, whiteCheckers, previous_chosen, capture, k, mouse_pos)
                                             turn_end = True
                                             capture = []
                                         else:
@@ -1009,12 +1017,11 @@ async def main():
                                         if black_rects[int((k[0] - k[0] % 2) / 2 + 4 * k[1])].scale_by(0.7).collidepoint(mouse_pos):
                                             if capture:
                                                 whiteCheckers, blackCheckers = await captures(whiteCheckers, blackCheckers,
-                                                                                        previous_chosen, capture, k)
+                                                                                        previous_chosen, capture, k, mouse_pos)
                                                 turn_end = True
                                                 capture = []
                                             else:
                                                 whiteCheckers = move(whiteCheckers, previous_chosen, k)
-                                                # pygame.draw.rect(screen, brown, black_rects[int((previous_chosen[0] - previous_chosen[0] % 2) / 2 + 4 * previous_chosen[1])])
                                                 draw_board()
                                                 draw_pieces(whiteCheckers.board, blackCheckers.board)
                                                 turn_end = True
@@ -1087,7 +1094,7 @@ async def main():
 
                                             if capture:
                                                 blackCheckers, whiteCheckers = await captures(blackCheckers, whiteCheckers,
-                                                                                        previous_chosen, capture, k, True)
+                                                                                        previous_chosen, capture, k, mouse_pos, True)
                                                 turn_end = True
                                                 capture = []
                                             else:
